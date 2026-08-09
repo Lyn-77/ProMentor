@@ -1,7 +1,7 @@
 ---
 name: promentor
 description: 把任意项目转成 MIT 风格的工程课程 在实践中学习
-argument-hint: "<init | learn | test | hint | submit | review | progress>"
+argument-hint: "<init | learn | test | hint | submit | review | progress | dashboard>"
 ---
 
 # ProMentor
@@ -34,13 +34,13 @@ argument-hint: "<init | learn | test | hint | submit | review | progress>"
 .promentor/
 ├── course.json                  # 课程元信息
 ├── progress.json                # 学习进度
+├── dashboard.html               # 课程仪表盘（dashboard 命令生成）
 ├── chapters/
 │   ├── ch01-<slug>/
 │   │   ├── lecture.md           # 讲义（Markdown）
 │   │   ├── source.md            # 源码阅读指南（标注关键行）
 │   │   ├── lab.json             # Lab 定义：接口签名、要求
-│   │   ├── lab_test.<ext>       # 行为测试（学生不可改）
-│   │   └── hints.json           # 三层提示（可选）
+│   │   └── lab_test.<ext>       # 行为测试（学生不可改）
 │   └── ch02-<slug>/
 └── submissions/
     └── ch01-<slug>/
@@ -161,33 +161,7 @@ argument-hint: "<init | learn | test | hint | submit | review | progress>"
 - `interface.functions` 中的 `signature` 是学生必须严格遵循的函数签名
 - `test_command` 是运行测试的 shell 命令，`{chapter_dir}` 会被替换为实际的 chapter 目录
 
-### 1.5 hints.json
-
-```json
-{
-  "hints": [
-    {
-      "level": 1,
-      "trigger": "FindRoute 对 :id 段的处理有问题",
-      "text": "你的 FindRoute 对 `:id` 段的处理逻辑有问题。回顾一下 `:` 前缀在路由中的含义？它不是一个字面字符串，它是一个规则。"
-    },
-    {
-      "level": 2,
-      "trigger": "参数路由反复失败",
-      "text": "试试把 path 按 `/` 分割后逐段比较。遇到以 `:` 开头的段时，它匹配任意值，段名（去掉 `:`）作为参数名，请求段作为参数值存进 map。"
-    },
-    {
-      "level": 3,
-      "trigger": "学生严重跑偏",
-      "text": "你需要一颗树。每个节点存一个 path segment。查找时遍历，静态段精确匹配，`:` 段通配匹配。gin 用了 radix tree，但你可以从更简单的 trie 开始。关键数据结构：`type node struct { segment string; children map[string]*node; paramChild *node; handler Handler }`"
-    }
-  ]
-}
-```
-
-**重要**：hints.json 是预生成的静态提示。但当学生使用 `/promentor hint` 时，你必须**先读学生代码**，再结合 hints.json 和测试结果，动态生成针对学生当前错误的提示。不要照搬 hints.json 原文。
-
-### 1.6 lecture.md 规范
+### 1.5 lecture.md 规范
 
 讲义是 Markdown 文件。写作要求：
 
@@ -197,7 +171,7 @@ argument-hint: "<init | learn | test | hint | submit | review | progress>"
 4. **与 Lab 的衔接**：结尾指明"接下来你要实现什么，对应讲义中的哪些概念"
 5. **行数控制**：单 Chapter 讲义不超过 300 行，聚焦核心
 
-### 1.7 source.md 规范
+### 1.6 source.md 规范
 
 源码阅读指南，标注原始代码的关键行：
 
@@ -271,7 +245,6 @@ Final: 组装 Mini Gin        [hard]  把所有组件拼成一个可用的框架
 2. `source.md` —— 标注关键源码行
 3. `lab.json` —— 定义接口签名
 4. `lab_test.<ext>` —— 行为测试（详见第 4.5 节）
-5. `hints.json` —— 三层分层提示（可选）
 
 生成完一个 Chapter 后，汇报进度（"Ch 1/5 已生成..."），继续下一个。
 
@@ -308,7 +281,7 @@ ProMentor: {项目名}  ({language})
 
   Overall: 2/5 chapters · 35% complete
 
-命令：learn <ch> | test | hint | submit | review | progress
+命令：learn <ch> | test | hint | submit | review | progress | dashboard
 ```
 
 如果 `.promentor/` 不存在，显示：
@@ -394,12 +367,13 @@ ProMentor: {项目名}  ({language})
 
 **核心原则：不直接给答案。给思考方向、关键概念、数据结构提示。**
 
+**重要**：ProMentor 不预生成任何提示文本，`hints.json` 已废除。每次 hint 都必须现场读取学生代码与测试结果，针对学生当前的具体错误动态生成。课程数据中不存在任何静态提示文件。
+
 **第一步：收集信息**
 
 1. 读取学生的 Lab 实现代码
 2. 读取最近的测试输出（或主动跑一次测试）
-3. 读取 `hints.json`（如果有）
-4. 读取 `progress.json` 中该 Chapter 的 `hint_level_reached`
+3. 读取 `progress.json` 中该 Chapter 的 `hint_level_reached`
 
 **第二步：确定 Hint 层级**
 
@@ -526,6 +500,46 @@ ProMentor: Gin Internals
 - `✓` — 已完成
 - `▶` — 进行中
 - `-` — 未开始
+
+### 2.9 `/promentor dashboard`
+
+**触发**: `/promentor dashboard`
+
+**第一步：定位数据**
+
+1. 确认项目根目录存在 `.promentor/`
+2. 不存在则提示先运行 `/promentor init`
+
+**第二步：运行仪表盘**
+
+执行 `dashboard.py`（与 SKILL.md 同目录；若已复制到项目根目录则直接执行）：
+
+```
+python3 <promentor-skill>/dashboard.py --html
+```
+
+**第三步：仪表盘自动完成**
+
+1. 扫描 `.promentor/chapters/`，自动发现所有已生成的 Chapter
+2. 读取 `course.json`，补充标题与难度
+3. 读取 `progress.json`，标记每章状态、分数、尝试次数、当前学习章节
+4. 检查每章内容完整性（lecture.md / source.md / lab.json / lab_test.*）
+5. 计算总体完成度
+
+**第四步：展示**
+
+- 终端直接输出课程面板：总体完成度、当前学习章节、每章状态与分数
+- `--html` 生成 `.promentor/dashboard.html`，浏览器打开即得可视化仪表盘
+
+```
+ProMentor: Gin Internals  (go)
+
+  ch01: HTTP Server Foundation [mid] ✓ 95.0%
+  ch02: Router Design [hard] ▶ -
+
+  Overall: 1/2 chapters · 50.0% complete
+  当前学习: ch02-router Router Design [hard]
+```
 
 ## 3. 教学策略
 
@@ -693,15 +707,6 @@ Review 的核心价值在于**对比**。学生看到了自己的实现能跑，
 4. 测试代码中 import 学生的包路径
 5. 测试文件放在 `.promentor/chapters/{chapter_id}/` 下
 6. 测试必须能独立编译和运行
-
-**hints.json 生成**：
-
-输入：该 Chapter 的常见错误和关键概念
-
-要求：
-1. 每个 Chapter 至少准备 Level 1 和 Level 2 的提示
-2. Level 3 可选（不是所有 Chapter 都需要）
-3. 提示是方向性的，不给完整答案
 
 ### 4.5 测试生成规范
 

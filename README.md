@@ -8,7 +8,8 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 
 ## 安装
 
-将 `promentor.md` 复制到 `.{YourAgent}/skills/promentor` 目录
+将 `skills/promentor/` 整个目录复制到 `.{YourAgent}/skills/promentor`
+（包含 `SKILL.md` 与 `dashboard.py`）
 
 不需要安装任何依赖。不需要数据库。ProMentor 只是告诉 AI 怎么当一个好老师。
 
@@ -71,6 +72,14 @@ AI 对比你的实现 vs 原始源码，解释设计决策、"为什么这样做
 /promentor progress # 详细进度
 ```
 
+### 8. 查看仪表盘
+
+```
+/promentor dashboard
+```
+
+自动读取 `.promentor/` 下生成的课程数据，展示总体完成度、当前学习章节、每章状态与内容完整性。加 `--html` 会生成可视化页面。
+
 ## 命令速查
 
 | 命令 | 说明 |
@@ -83,6 +92,7 @@ AI 对比你的实现 vs 原始源码，解释设计决策、"为什么这样做
 | `/promentor submit` | 正式提交，锁定成绩 |
 | `/promentor review` | 对比实现 vs 原始源码 |
 | `/promentor progress` | 查看总进度 |
+| `/promentor dashboard` | 课程仪表盘（完成度 + 当前学习 + 内容完整性） |
 
 ## 学习模型
 
