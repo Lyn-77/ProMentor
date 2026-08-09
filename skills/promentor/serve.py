@@ -26,6 +26,7 @@
 
 import argparse
 import errno
+from functools import partial
 import http.server
 import os
 import re
@@ -47,6 +48,31 @@ class ProMentorServer(http.server.ThreadingHTTPServer):
 
     address_family = socket.AF_INET6
     allow_reuse_address = True
+
+
+class SPAHandler(http.server.SimpleHTTPRequestHandler):
+    """静态服务器 + SPA fallback：未生成的章节路由返回主页壳，由客户端按路径渲染"""
+
+    def __init__(self, *args, base_path=BASE_PATH, **kwargs):
+        self.base_path = base_path
+        super().__init__(*args, **kwargs)
+
+    def _spa_fallback(self):
+        if not self.path.startswith(self.base_path):
+            return
+        if self.path.startswith(f"{self.base_path}/_next/"):
+            return
+        if os.path.exists(self.translate_path(self.path)):
+            return
+        self.path = f"{self.base_path}/index.html"
+
+    def do_GET(self):
+        self._spa_fallback()
+        super().do_GET()
+
+    def do_HEAD(self):
+        self._spa_fallback()
+        super().do_HEAD()
 
 
 def parse_args(argv):
@@ -302,7 +328,7 @@ def cmd_start(args) -> int:
     port = free_port(args.port)
     url = f"http://localhost:{port}{args.base_path}/"
 
-    handler = http.server.SimpleHTTPRequestHandler
+    handler = partial(SPAHandler, base_path=args.base_path)
     try:
         httpd = ProMentorServer(("::", port), handler)
     except OSError as exc:

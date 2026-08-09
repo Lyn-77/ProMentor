@@ -63,8 +63,12 @@ export function ChapterDetail({
         </button>
 
         <div className="space-y-1">
-          <p className="text-muted-foreground font-mono text-xs">{chapter.id}</p>
           <p className="text-sm leading-snug font-medium">{chapter.title}</p>
+          <p className="text-muted-foreground font-mono text-xs">{chapter.id} · 难度 {chapter.difficulty}</p>
+          <Badge variant={view.variant}>
+            <Icon className="size-3" />
+            {view.label}
+          </Badge>
         </div>
 
         <nav className="space-y-1">
@@ -88,22 +92,7 @@ export function ChapterDetail({
       </aside>
 
       <div className="min-w-0 flex-1 space-y-5">
-        <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-medium">{chapter.title}</h1>
-            <Badge variant={view.variant}>
-              <Icon className="size-3" />
-              {view.label}
-            </Badge>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            {chapter.id} · 难度 {chapter.difficulty}
-            {chapter.progress.status === "completed" &&
-              ` · 分数 ${(chapter.progress.score ?? 0).toFixed(1)}%`}
-          </p>
-        </div>
-
-        <div className="border-t pt-6">
+        <div className="pt-6">
           {loading ? (
             <p className="text-muted-foreground inline-flex items-center gap-2 text-sm">
               <LoaderCircle className="size-4 animate-spin" />

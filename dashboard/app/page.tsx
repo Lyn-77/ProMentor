@@ -1,9 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { LoaderCircle } from "lucide-react"
+import { LoaderCircle, Moon, Sun } from "lucide-react"
 
-import { ChapterDetail } from "@/components/dashboard/chapter-detail"
+import { ChapterPage } from "@/components/dashboard/chapter-page"
 import { STATUS_VIEW } from "@/components/dashboard/status"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,11 +17,15 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
+  BASE_PATH,
+  chapterIdFromPath,
   loadCourse,
   type Chapter,
   type Course,
 } from "@/lib/prom"
 import { cn } from "@/lib/utils"
+import { useTheme } from "next-themes"
+import { Button } from "@/components/ui/button"
 
 const DIFFICULTY_VARIANT: Record<string, "success" | "warning" | "destructive"> = {
   easy: "success",
@@ -32,7 +36,7 @@ const DIFFICULTY_VARIANT: Record<string, "success" | "warning" | "destructive"> 
 export default function Page() {
   const [course, setCourse] = useState<Course | null>(null)
   const [ready, setReady] = useState(false)
-  const [activeId, setActiveId] = useState<string | null>(null)
+  const [chapterId, setChapterId] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -49,23 +53,11 @@ export default function Page() {
   }, [])
 
   useEffect(() => {
-    const syncHash = () =>
-      setActiveId(window.location.hash.replace(/^#/, "") || null)
-    syncHash()
-    window.addEventListener("hashchange", syncHash)
-    return () => window.removeEventListener("hashchange", syncHash)
+    setChapterId(chapterIdFromPath(window.location.pathname))
   }, [])
 
   const openChapter = useCallback((id: string) => {
-    if (window.location.hash !== `#${id}`) {
-      window.location.hash = id
-    }
-    setActiveId(id)
-  }, [])
-
-  const closeChapter = useCallback(() => {
-    window.location.hash = ""
-    setActiveId(null)
+    window.location.href = `${BASE_PATH}/chapters/${id}/`
   }, [])
 
   if (!ready) {
@@ -75,14 +67,10 @@ export default function Page() {
     return <EmptyState />
   }
 
-  const active = activeId
-    ? course.chapters.find((ch) => ch.id === activeId)
-    : null
-
   return (
-    <main className="mx-auto max-w-4xl p-6">
-      {active ? (
-        <ChapterDetail chapter={active} onBack={closeChapter} />
+    <main className={cn("mx-auto p-6", chapterId ? "max-w-5xl" : "max-w-4xl")}>
+      {chapterId ? (
+        <ChapterPage chapterId={chapterId} />
       ) : (
         <Overview course={course} onOpen={openChapter} />
       )}
@@ -125,6 +113,7 @@ function Overview({
   onOpen: (id: string) => void
 }) {
   const current = course.current
+  const theme = useTheme()
   return (
     <div className="space-y-6">
       <header className="flex items-center gap-3">
@@ -132,6 +121,19 @@ function Overview({
         <p className="text-muted-foreground text-sm">
           {course.language}
         </p>
+        <Button
+          className="ml-auto"
+          variant="outline"
+          size="icon"
+          onClick={() => {
+            theme.theme == "dark" ?
+              theme.setTheme("light") :
+              theme.setTheme("dark")
+          }}
+        >
+          <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+          <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+        </Button>
       </header>
 
       <Card>
@@ -153,26 +155,6 @@ function Overview({
         <StatCard label="学习中" value={course.inProgress} tone="warning" />
         <StatCard label="未开始" value={course.notStarted} tone="muted" />
       </div>
-
-      {current && (
-        <Card className="border-primary/40">
-          <CardHeader>
-            <CardTitle>当前学习</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <button
-              type="button"
-              onClick={() => onOpen(current.id)}
-              className="text-sm font-medium hover:underline"
-            >
-              {current.id} · {current.title}
-            </button>
-            <p className="text-muted-foreground mt-1 text-xs">
-              点击继续阅读讲义与源码导读
-            </p>
-          </CardContent>
-        </Card>
-      )}
 
       <Card>
         <Table>
@@ -264,7 +246,7 @@ function ChapterRow({
       </TableCell>
       <TableCell className="text-muted-foreground">
         {chapter.progress.status === "completed"
-          ? `${(chapter.progress.score ?? 0).toFixed(1)}%`
+          ? `${(chapter.progress.score ?? 0).toFixed(1)}`
           : "-"}
       </TableCell>
       <TableCell className="text-muted-foreground">
