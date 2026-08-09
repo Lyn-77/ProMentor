@@ -1,20 +1,12 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import {
-  ArrowLeft,
-  BookOpen,
-  CheckCircle2,
-  Circle,
-  Code2,
-  FileQuestion,
-  LoaderCircle,
-  PlayCircle,
-} from "lucide-react"
+import { LoaderCircle } from "lucide-react"
 
+import { ChapterDetail } from "@/components/dashboard/chapter-detail"
+import { STATUS_VIEW } from "@/components/dashboard/status"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MarkdownView } from "@/components/markdown-view"
 import { Progress } from "@/components/ui/progress"
 import {
   Table,
@@ -25,23 +17,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
-  loadChapterContent,
   loadCourse,
   type Chapter,
-  type ChapterContent,
-  type ChapterStatus,
   type Course,
 } from "@/lib/prom"
 import { cn } from "@/lib/utils"
-
-const STATUS_VIEW: Record<
-  ChapterStatus,
-  { label: string; variant: "success" | "warning" | "muted"; icon: typeof CheckCircle2 }
-> = {
-  completed: { label: "已完成", variant: "success", icon: CheckCircle2 },
-  in_progress: { label: "学习中", variant: "warning", icon: PlayCircle },
-  not_started: { label: "未开始", variant: "muted", icon: Circle },
-}
 
 const DIFFICULTY_VARIANT: Record<string, "success" | "warning" | "destructive"> = {
   easy: "success",
@@ -53,8 +33,6 @@ export default function Page() {
   const [course, setCourse] = useState<Course | null>(null)
   const [ready, setReady] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [content, setContent] = useState<ChapterContent | null>(null)
-  const [loadingContent, setLoadingContent] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -78,25 +56,16 @@ export default function Page() {
     return () => window.removeEventListener("hashchange", syncHash)
   }, [])
 
-  const openChapter = useCallback(async (id: string) => {
+  const openChapter = useCallback((id: string) => {
     if (window.location.hash !== `#${id}`) {
       window.location.hash = id
     }
     setActiveId(id)
-    setContent(null)
-    setLoadingContent(true)
-    try {
-      const loaded = await loadChapterContent(id)
-      setContent(loaded)
-    } finally {
-      setLoadingContent(false)
-    }
   }, [])
 
   const closeChapter = useCallback(() => {
     window.location.hash = ""
     setActiveId(null)
-    setContent(null)
   }, [])
 
   if (!ready) {
@@ -113,12 +82,7 @@ export default function Page() {
   return (
     <main className="mx-auto max-w-4xl p-6">
       {active ? (
-        <ChapterDetail
-          chapter={active}
-          content={content}
-          loading={loadingContent}
-          onBack={closeChapter}
-        />
+        <ChapterDetail chapter={active} onBack={closeChapter} />
       ) : (
         <Overview course={course} onOpen={openChapter} />
       )}
@@ -307,85 +271,5 @@ function ChapterRow({
         {chapter.progress.attempts ?? 0}
       </TableCell>
     </TableRow>
-  )
-}
-
-function ChapterDetail({
-  chapter,
-  content,
-  loading,
-  onBack,
-}: {
-  chapter: Chapter
-  content: ChapterContent | null
-  loading: boolean
-  onBack: () => void
-}) {
-  const view = STATUS_VIEW[chapter.progress.status] ?? STATUS_VIEW.not_started
-  const Icon = view.icon
-  return (
-    <div className="space-y-6">
-      <button
-        type="button"
-        onClick={onBack}
-        className="text-muted-foreground inline-flex items-center gap-1.5 text-sm hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        返回课程总览
-      </button>
-
-      <div className="space-y-1">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-medium">{chapter.title}</h1>
-          <Badge variant={view.variant}>
-            <Icon className="size-3" />
-            {view.label}
-          </Badge>
-        </div>
-        <p className="text-muted-foreground text-sm">
-          {chapter.id} · 难度 {chapter.difficulty}
-          {chapter.progress.status === "completed" &&
-            ` · 分数 ${(chapter.progress.score ?? 0).toFixed(1)}%`}
-        </p>
-      </div>
-
-      {loading ? (
-        <Loading />
-      ) : (
-        <div className="space-y-8">
-          <section className="space-y-2">
-            <h2 className="text-muted-foreground flex items-center gap-2 border-b pb-2 text-sm font-medium">
-              <BookOpen className="size-4" />
-              讲义 Lecture
-            </h2>
-            {content?.lecture ? (
-              <MarkdownView content={content.lecture} />
-            ) : (
-              <EmptySection />
-            )}
-          </section>
-          <section className="space-y-2">
-            <h2 className="text-muted-foreground flex items-center gap-2 border-b pb-2 text-sm font-medium">
-              <Code2 className="size-4" />
-              源码导读 Source
-            </h2>
-            {content?.source ? (
-              <MarkdownView content={content.source} />
-            ) : (
-              <EmptySection />
-            )}
-          </section>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function EmptySection() {
-  return (
-    <p className="text-muted-foreground inline-flex items-center gap-2 text-sm">
-      <FileQuestion className="size-4" />
-      该内容尚未生成
-    </p>
   )
 }
