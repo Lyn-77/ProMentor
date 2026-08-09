@@ -509,19 +509,26 @@ ProMentor: Gin Internals
 1. 确认项目根目录存在 `.promentor/`
 2. 不存在则提示先运行 `/promentor init`
 
-**第二步：部署仪表盘**
+**第二步：挂载仪表盘**
 
-技能包内已附带构建产物 `dashboard/`（静态站点，不含 Next.js 源码）。执行：
+在项目根目录执行技能包中的 `serve.py`（agent 后台运行）：
 
-1. 将技能包中的 `dashboard/` 目录复制到项目根目录（若不存在）
-2. 在项目根目录启动静态服务器：`python3 -m http.server 8000`
-3. 浏览器打开 http://localhost:8000/dashboard/
+```
+python3 <promentor-skill>/serve.py
+```
+
+脚本自动完成：
+1. 将构建产物复制到项目根 `dashboard/`（已存在则复用，`--force` 强制刷新）
+2. 自动选择空闲端口并启动静态服务器
+3. 输出访问 URL
 
 **第三步：仪表盘功能**
 
+- Agent 从脚本输出中提取 URL 并告知用户，例如 `ProMentor Dashboard: http://localhost:8000/dashboard/`
 - 主页自动读取 `.promentor/`：总体完成度、当前学习章节、每章状态/分数/尝试/内容完整性
 - 点击任意 Chapter，在页面内直接阅览该章的 lecture.md 与 source.md（Streamdown 渲染）
 - 当前章节同步到 URL hash（#ch01-xxx），可刷新、可分享
+- 停止服务：结束脚本进程即可
 
 **第四步：重新构建（可选）**
 
