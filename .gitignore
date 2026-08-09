@@ -8,3 +8,6 @@
 # Python
 __pycache__/
 *.pyc
+
+# Dashboard 源码（独立仓库，只分发 skills/promentor/dashboard 构建产物）
+/dashboard/

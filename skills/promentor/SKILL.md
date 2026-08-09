@@ -34,7 +34,6 @@ argument-hint: "<init | learn | test | hint | submit | review | progress | dashb
 .promentor/
 ├── course.json                  # 课程元信息
 ├── progress.json                # 学习进度
-├── dashboard.html               # 课程仪表盘（dashboard 命令生成）
 ├── chapters/
 │   ├── ch01-<slug>/
 │   │   ├── lecture.md           # 讲义（Markdown）
@@ -510,36 +509,29 @@ ProMentor: Gin Internals
 1. 确认项目根目录存在 `.promentor/`
 2. 不存在则提示先运行 `/promentor init`
 
-**第二步：运行仪表盘**
+**第二步：部署仪表盘**
 
-执行 `dashboard.py`（与 SKILL.md 同目录；若已复制到项目根目录则直接执行）：
+技能包内已附带构建产物 `dashboard/`（静态站点，不含 Next.js 源码）。执行：
 
-```
-python3 <promentor-skill>/dashboard.py --html
-```
+1. 将技能包中的 `dashboard/` 目录复制到项目根目录（若不存在）
+2. 在项目根目录启动静态服务器：`python3 -m http.server 8000`
+3. 浏览器打开 http://localhost:8000/dashboard/
 
-**第三步：仪表盘自动完成**
+**第三步：仪表盘功能**
 
-1. 扫描 `.promentor/chapters/`，自动发现所有已生成的 Chapter
-2. 读取 `course.json`，补充标题与难度
-3. 读取 `progress.json`，标记每章状态、分数、尝试次数、当前学习章节
-4. 检查每章内容完整性（lecture.md / source.md / lab.json / lab_test.*）
-5. 计算总体完成度
+- 主页自动读取 `.promentor/`：总体完成度、当前学习章节、每章状态/分数/尝试/内容完整性
+- 点击任意 Chapter，在页面内直接阅览该章的 lecture.md 与 source.md（Streamdown 渲染）
+- 当前章节同步到 URL hash（#ch01-xxx），可刷新、可分享
 
-**第四步：展示**
+**第四步：重新构建（可选）**
 
-- 终端直接输出课程面板：总体完成度、当前学习章节、每章状态与分数
-- `--html` 生成 `.promentor/dashboard.html`，浏览器打开即得可视化仪表盘
+产物是通用静态站点，不内嵌任何课程数据，无需为每个项目重新构建。修改源码后重建：
 
 ```
-ProMentor: Gin Internals  (go)
-
-  ch01: HTTP Server Foundation [mid] ✓ 95.0%
-  ch02: Router Design [hard] ▶ -
-
-  Overall: 1/2 chapters · 50.0% complete
-  当前学习: ch02-router Router Design [hard]
+cd dashboard && node scripts/build.mjs [--base-path=/子路径]
 ```
+
+构建产物输出到技能包 `dashboard/`，只分发构建产物，不含源码。
 
 ## 3. 教学策略
 
