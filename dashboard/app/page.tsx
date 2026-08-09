@@ -163,10 +163,10 @@ function Overview({
   const current = course.current
   return (
     <div className="space-y-6">
-      <header className="space-y-1">
+      <header className="flex items-center gap-3">
         <h1 className="text-2xl font-medium">{course.name}</h1>
         <p className="text-muted-foreground text-sm">
-          {course.language} · 数据源 .promentor/
+          {course.language}
         </p>
       </header>
 
