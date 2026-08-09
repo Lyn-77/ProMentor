@@ -110,9 +110,12 @@ async function hasFile(path: string): Promise<boolean> {
 }
 
 async function chapterFiles(id: string): Promise<ChapterFiles> {
-  const entries = Object.entries(REQUIRED_FILES) as [keyof ChapterFiles, string][]
+  const entries = Object.entries(REQUIRED_FILES) as [
+    keyof ChapterFiles,
+    string,
+  ][]
   const results = await Promise.all(
-    entries.map(([, file]) => hasFile(`chapters/${id}/${file}`)),
+    entries.map(([, file]) => hasFile(`chapters/${id}/${file}`))
   )
   return {
     lecture: results[0],
@@ -129,7 +132,9 @@ function fallbackTitle(slug: string): string {
 }
 
 function parseChapter(meta: ChapterMeta, progress: ProgressJson): Chapter {
-  const prog = progress.chapters?.[meta.id] ?? { status: "not_started" as ChapterStatus }
+  const prog = progress.chapters?.[meta.id] ?? {
+    status: "not_started" as ChapterStatus,
+  }
   const match = meta.id.match(/^(ch\d+)-(.*)$/)
   const num = match?.[1] ?? meta.id
   const slug = match?.[2] ?? meta.id
@@ -159,7 +164,7 @@ export async function loadCourse(): Promise<Course> {
       const chapter = parseChapter(meta, progress)
       chapter.files = await chapterFiles(chapter.id)
       return chapter
-    }),
+    })
   )
 
   const currentId = progress.current_chapter ?? null
@@ -168,16 +173,22 @@ export async function loadCourse(): Promise<Course> {
     chapters.find((ch) => ch.progress.status === "in_progress") ??
     null
 
-  const completed = chapters.filter((ch) => ch.progress.status === "completed").length
-  const inProgress = chapters.filter((ch) => ch.progress.status === "in_progress").length
-  const notStarted = chapters.filter((ch) => ch.progress.status === "not_started").length
+  const completed = chapters.filter(
+    (ch) => ch.progress.status === "completed"
+  ).length
+  const inProgress = chapters.filter(
+    (ch) => ch.progress.status === "in_progress"
+  ).length
+  const notStarted = chapters.filter(
+    (ch) => ch.progress.status === "not_started"
+  ).length
   const total = chapters.length
   const percent = total ? (completed / total) * 100 : 0
 
   const missing = chapters.flatMap((ch) =>
     Object.keys(REQUIRED_FILES)
       .filter((name) => !ch.files[name as keyof ChapterFiles])
-      .map((name) => `${ch.id} 缺 ${name}`),
+      .map((name) => `${ch.id} 缺 ${name}`)
   )
 
   return {

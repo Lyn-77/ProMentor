@@ -1,7 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ArrowLeft, BookOpen, Code2, FileQuestion, LoaderCircle } from "lucide-react"
+import {
+  ArrowLeft,
+  BookOpen,
+  Code2,
+  FileQuestion,
+  LoaderCircle,
+} from "lucide-react"
 
 import { STATUS_VIEW } from "@/components/dashboard/status"
 import { Badge } from "@/components/ui/badge"
@@ -56,7 +62,7 @@ export function ChapterDetail({
         <button
           type="button"
           onClick={onBack}
-          className="text-muted-foreground inline-flex items-center gap-1.5 text-sm hover:text-foreground"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
           返回课程总览
@@ -64,7 +70,9 @@ export function ChapterDetail({
 
         <div className="space-y-1">
           <p className="text-sm leading-snug font-medium">{chapter.title}</p>
-          <p className="text-muted-foreground font-mono text-xs">{chapter.id} · 难度 {chapter.difficulty}</p>
+          <p className="font-mono text-xs text-muted-foreground">
+            {chapter.id} · 难度 {chapter.difficulty}
+          </p>
           <Badge variant={view.variant}>
             <Icon className="size-3" />
             {view.label}
@@ -81,7 +89,7 @@ export function ChapterDetail({
                 "flex w-full items-center gap-2 border-l-2 px-3 py-2 text-left text-sm transition-colors",
                 tab === id
                   ? "border-primary bg-muted font-medium text-foreground"
-                  : "text-muted-foreground border-transparent hover:text-foreground",
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               )}
             >
               <TabIcon className="size-4" />
@@ -94,14 +102,14 @@ export function ChapterDetail({
       <div className="min-w-0 flex-1 space-y-5">
         <div className="pt-6">
           {loading ? (
-            <p className="text-muted-foreground inline-flex items-center gap-2 text-sm">
+            <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
               <LoaderCircle className="size-4 animate-spin" />
               正在加载 …
             </p>
           ) : body ? (
             <MarkdownView content={body} />
           ) : (
-            <p className="text-muted-foreground inline-flex items-center gap-2 text-sm">
+            <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
               <FileQuestion className="size-4" />
               {TABS.find((item) => item.id === tab)?.label}尚未生成
             </p>

@@ -8,24 +8,24 @@ import { Streamdown } from "streamdown"
 import "streamdown/styles.css"
 
 export function MarkdownView({
-    content,
-    className,
+  content,
+  className,
 }: {
-    content: string
-    className?: string
+  content: string
+  className?: string
 }) {
-    return (
-        <Streamdown
-            plugins={{
-                code,
-                mermaid,
-                math,
-                cjk
-            }}
-            mode="static"
-            className={className}
-        >
-            {content}
-        </Streamdown>
-    )
+  return (
+    <Streamdown
+      plugins={{
+        code,
+        mermaid,
+        math,
+        cjk,
+      }}
+      mode="static"
+      className={className}
+    >
+      {content}
+    </Streamdown>
+  )
 }

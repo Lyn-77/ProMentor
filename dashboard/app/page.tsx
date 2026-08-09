@@ -27,7 +27,10 @@ import { cn } from "@/lib/utils"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 
-const DIFFICULTY_VARIANT: Record<string, "success" | "warning" | "destructive"> = {
+const DIFFICULTY_VARIANT: Record<
+  string,
+  "success" | "warning" | "destructive"
+> = {
   easy: "success",
   mid: "warning",
   hard: "destructive",
@@ -80,7 +83,7 @@ export default function Page() {
 
 function Loading() {
   return (
-    <main className="flex min-h-svh items-center justify-center gap-2 text-muted-foreground text-sm">
+    <main className="flex min-h-svh items-center justify-center gap-2 text-sm text-muted-foreground">
       <LoaderCircle className="size-4 animate-spin" />
       正在读取 .promentor/ …
     </main>
@@ -95,7 +98,7 @@ function EmptyState() {
           <CardTitle>还没有课程</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             未在项目根目录找到 .promentor/。请先运行 /promentor init 生成课程，
             然后在项目根目录启动静态服务器访问本页面。
           </p>
@@ -118,17 +121,15 @@ function Overview({
     <div className="space-y-6">
       <header className="flex items-center gap-3">
         <h1 className="text-2xl font-medium">{course.name}</h1>
-        <p className="text-muted-foreground text-sm">
-          {course.language}
-        </p>
+        <p className="text-sm text-muted-foreground">{course.language}</p>
         <Button
           className="ml-auto"
           variant="outline"
           size="icon"
           onClick={() => {
-            theme.theme == "dark" ?
-              theme.setTheme("light") :
-              theme.setTheme("dark")
+            theme.theme == "dark"
+              ? theme.setTheme("light")
+              : theme.setTheme("dark")
           }}
         >
           <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
@@ -140,10 +141,12 @@ function Overview({
         <CardContent className="space-y-3">
           <div className="flex items-baseline justify-between">
             <span className="text-sm">总体进度</span>
-            <span className="font-medium text-sm">{course.percent.toFixed(1)}%</span>
+            <span className="text-sm font-medium">
+              {course.percent.toFixed(1)}%
+            </span>
           </div>
           <Progress value={course.percent} />
-          <p className="text-muted-foreground text-xs">
+          <p className="text-xs text-muted-foreground">
             {course.completed}/{course.total} 章节完成
             {current && ` · 当前学习: ${current.title}`}
           </p>
@@ -182,7 +185,7 @@ function Overview({
             <CardTitle>内容不完整</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="text-muted-foreground space-y-1 text-xs">
+            <ul className="space-y-1 text-xs text-muted-foreground">
               {course.missing.map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -212,7 +215,7 @@ function StatCard({
     <Card>
       <CardContent className="space-y-1">
         <p className={cn("text-2xl font-medium", tones[tone])}>{value}</p>
-        <p className="text-muted-foreground text-xs">{label}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
       </CardContent>
     </Card>
   )

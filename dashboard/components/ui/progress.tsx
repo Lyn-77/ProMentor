@@ -11,11 +11,11 @@ function Progress({
   return (
     <div
       data-slot="progress"
-      className={cn("bg-muted h-2 w-full overflow-hidden", className)}
+      className={cn("h-2 w-full overflow-hidden bg-muted", className)}
       {...props}
     >
       <div
-        className="bg-primary h-full transition-all"
+        className="h-full bg-primary transition-all"
         style={{ width: `${clamped}%` }}
       />
     </div>

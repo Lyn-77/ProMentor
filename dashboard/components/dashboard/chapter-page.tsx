@@ -30,7 +30,7 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
 
   if (notFound) {
     return (
-      <p className="text-muted-foreground text-sm">
+      <p className="text-sm text-muted-foreground">
         未找到章节 {chapterId}，{" "}
         <a href={`${BASE_PATH}/`} className="text-foreground underline">
           返回课程总览
@@ -40,7 +40,7 @@ export function ChapterPage({ chapterId }: { chapterId: string }) {
   }
   if (!chapter) {
     return (
-      <p className="text-muted-foreground inline-flex items-center gap-2 text-sm">
+      <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
         <LoaderCircle className="size-4 animate-spin" />
         正在加载章节 …
       </p>
