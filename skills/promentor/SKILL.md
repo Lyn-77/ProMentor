@@ -504,31 +504,56 @@ ProMentor: Gin Internals
 
 **触发**: `/promentor dashboard`
 
-**第一步：定位数据**
+**第一步：确认数据**
 
 1. 确认项目根目录存在 `.promentor/`
 2. 不存在则提示先运行 `/promentor init`
 
-**第二步：挂载仪表盘**
+**第二步：启动**
 
-在项目根目录执行技能包中的 `serve.py`，后台运行：
+在项目根目录执行技能包中的 `serve.py`：
 
 ```
-python3 <promentor-skill>/serve.py --daemon
+python3 <promentor-skill>/serve.py
 ```
 
 脚本自动完成：
-1. 从 3000 起自动寻找最小可用端口（3000 被占用则 3001、3002 …）
+1. 从 3000 起自动寻找最小可用端口（被占用则 3001、3002 …）
 2. 将构建产物复制到项目根 `dashboard/`（已存在则复用，`--force` 强制刷新）
-3. 绑定所有本地接口并后台启动静态服务器，进程脱离会话持续运行
+3. 后台启动静态服务器并打开浏览器
 
 **第三步：展示**
 
-1. Agent 读取 `/tmp/promentor-dashboard.log`，提取访问 URL 告知用户，例如 `ProMentor Dashboard: http://localhost:3000/dashboard/`
-2. 主页自动读取 `.promentor/`：总体完成度、当前学习章节、每章状态/分数/尝试/内容完整性
-3. 点击任意 Chapter，在页面内直接阅览该章的 lecture.md 与 source.md（Streamdown 渲染）
-4. 当前章节同步到 URL hash（#ch01-xxx），可刷新、可分享
-5. 停止服务：`kill $(cat /tmp/promentor-dashboard.pid)`
+Agent 将脚本输出的进程信息完整展示给用户，并告知访问 URL：
+
+```
+ProMentor Dashboard: 运行中
+  PID:   12345
+  端口:  3000
+  URL:   http://localhost:3000/dashboard/
+```
+
+- 主页自动读取 `.promentor/`：总体完成度、当前学习章节、每章状态/分数/尝试/内容完整性
+- 点击任意 Chapter，在页面内直接阅览该章的 lecture.md 与 source.md（Streamdown 渲染）
+- 当前章节同步到 URL hash（#ch01-xxx），可刷新、可分享
+- 浏览器未自动打开时，Agent 手动执行 `open <url>`（macOS）/ `xdg-open <url>`（Linux）
+
+**查看状态**
+
+```
+/promentor dashboard status
+→ python3 <promentor-skill>/serve.py status
+```
+
+**停止**
+
+`/promentor dashboard kill`、`stop`、`shutdown` 均可：
+
+```
+python3 <promentor-skill>/serve.py stop
+```
+
+停止后确认进程已退出并告知用户。
 
 若脚本输出"端口绑定被系统沙箱拒绝"，需要以授权方式运行。
 

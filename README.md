@@ -84,8 +84,9 @@ AI 对比你的实现 vs 原始源码，解释设计决策、"为什么这样做
 
 ```
 cd /path/to/project
-python3 <promentor-skill>/serve.py --daemon
-# 读取 /tmp/promentor-dashboard.log 获取 URL（默认 http://localhost:3000/dashboard/）
+python3 <promentor-skill>/serve.py          # 启动并打开浏览器
+python3 <promentor-skill>/serve.py status   # 查看运行进程
+python3 <promentor-skill>/serve.py stop     # 停止
 ```
 
 ## 命令速查

@@ -4,18 +4,23 @@
 ==========================================================================
  ProMentor Dashboard Server
 --------------------------------------------------------------------------
- 将技能包内的构建产物挂载到当前项目：
-   1. 复制产物到项目根 dashboard/（已存在则复用）
-   2. 自动选择空闲端口并启动静态服务器
-   3. 输出访问 URL
+ 挂载并管理 ProMentor Dashboard 进程：
+   - start:   部署产物、从 3000 起找最小可用端口、后台启动、打开浏览器
+   - status:  显示运行中的服务进程（PID/端口/URL）
+   - stop:    停止服务（kill / shutdown 同义）
+ 无状态：不写 JSON、不写日志，仅用 PID 文件定位进程。
  零依赖：仅 Python 标准库。
 --------------------------------------------------------------------------
-用法（在项目根目录运行）:
-   python3 <promentor-skill>/serve.py
-   python3 <promentor-skill>/serve.py --daemon  # 后台运行，日志见 /tmp
-   python3 <promentor-skill>/serve.py --force    # 强制刷新产物
-   python3 <promentor-skill>/serve.py --port 3000  # 起始端口（默认 3000）
-   python3 <promentor-skill>/serve.py --base-path=/dash
+ 用法（在项目根目录运行）:
+   python3 <promentor-skill>/serve.py                 # 启动
+   python3 <promentor-skill>/serve.py status          # 查看状态
+   python3 <promentor-skill>/serve.py stop            # 停止
+   python3 <promentor-skill>/serve.py kill            # 同 stop
+   python3 <promentor-skill>/serve.py shutdown        # 同 stop
+   python3 <promentor-skill>/serve.py start --force   # 强制刷新产物后启动
+   python3 <promentor-skill>/serve.py start --port 4000
+   python3 <promentor-skill>/serve.py start --no-open # 启动但不打开浏览器
+   python3 <promentor-skill>/serve.py start --foreground
 ==========================================================================
 """
 
@@ -23,15 +28,17 @@ import argparse
 import errno
 import http.server
 import os
+import re
 import shutil
 import signal
 import socket
+import subprocess
 import sys
+import time
 from pathlib import Path
 
 DEFAULT_PORT = 3000
 BASE_PATH = "/dashboard"
-LOG_PATH = "/tmp/promentor-dashboard.log"
 PID_PATH = "/tmp/promentor-dashboard.pid"
 
 
@@ -44,7 +51,14 @@ class ProMentorServer(http.server.ThreadingHTTPServer):
 
 def parse_args(argv):
     """解析命令行参数"""
-    parser = argparse.ArgumentParser(description="挂载 ProMentor Dashboard")
+    parser = argparse.ArgumentParser(description="挂载并管理 ProMentor Dashboard")
+    parser.add_argument(
+        "command",
+        nargs="?",
+        default="start",
+        choices=["start", "status", "stop", "kill", "shutdown"],
+        help="start | status | stop（kill / shutdown 同义）",
+    )
     parser.add_argument(
         "--port",
         type=int,
@@ -62,14 +76,14 @@ def parse_args(argv):
         help=f"部署子路径，需与构建产物一致（默认 {BASE_PATH}）",
     )
     parser.add_argument(
-        "--daemon",
+        "--foreground",
         action="store_true",
-        help="后台运行：进程脱离会话持续服务，URL 写入日志",
+        help="前台运行（调试用），不写 PID 文件",
     )
     parser.add_argument(
-        "--log",
-        default=LOG_PATH,
-        help=f"后台运行时的日志文件（默认 {LOG_PATH}）",
+        "--no-open",
+        action="store_true",
+        help="启动后不自动打开浏览器",
     )
     return parser.parse_args(argv)
 
@@ -101,7 +115,7 @@ def deploy(project: Path, assets: Path, force: bool) -> Path:
     if target.exists():
         shutil.rmtree(target)
     shutil.copytree(assets, target)
-    print(f"已部署产物: {target}")
+    print(f"已部署产物: {target}", flush=True)
     return target
 
 
@@ -123,19 +137,19 @@ def free_port(start: int) -> int:
                     )
                     sys.exit(1)
                 port += 1
-    print("错误：没有可用端口")
+    print("错误：没有可用端口", flush=True)
     sys.exit(1)
 
 
-def daemonize(log_path: str) -> int:
-    """fork 脱离当前会话，父进程退出，返回子进程 PID"""
+def daemonize() -> int:
+    """fork 脱离当前会话，stdout/stderr 丢弃，返回子进程 PID"""
     pid = os.fork()
     if pid > 0:
         return pid
     os.setsid()
-    log_fd = open(log_path, "w")
-    os.dup2(log_fd.fileno(), sys.stdout.fileno())
-    os.dup2(log_fd.fileno(), sys.stderr.fileno())
+    devnull = os.open(os.devnull, os.O_WRONLY)
+    os.dup2(devnull, sys.stdout.fileno())
+    os.dup2(devnull, sys.stderr.fileno())
     return 0
 
 
@@ -144,10 +158,145 @@ def handle_term(_signum, _frame):
     raise KeyboardInterrupt
 
 
-def main(argv=None):
-    """入口：部署产物、启动服务器、输出 URL"""
-    args = parse_args(argv)
+def open_browser(url: str) -> None:
+    """用系统默认浏览器打开 URL，失败静默"""
+    if sys.platform == "darwin":
+        command = ["open", url]
+    elif sys.platform.startswith("linux"):
+        command = ["xdg-open", url]
+    else:
+        return
+    try:
+        subprocess.Popen(
+            command,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except OSError:
+        pass
+
+
+def load_pid():
+    """读取 PID 文件，缺失或损坏返回 None"""
+    try:
+        return int(Path(PID_PATH).read_text(encoding="utf-8").strip())
+    except (FileNotFoundError, ValueError):
+        return None
+
+
+def clear_pid() -> None:
+    """清理 PID 文件"""
+    Path(PID_PATH).unlink(missing_ok=True)
+
+
+def is_alive(pid) -> bool:
+    """进程是否存活"""
+    if not pid:
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+
+def process_port(pid) -> int | None:
+    """从进程本身查询监听端口（lsof 不可用时返回 None）"""
+    try:
+        output = subprocess.run(
+            ["lsof", "-nP", "-iTCP", "-sTCP:LISTEN", "-a", "-p", str(pid)],
+            capture_output=True,
+            text=True,
+            timeout=3,
+        ).stdout
+        for line in output.splitlines():
+            match = re.search(r"TCP .*?:(\d+) \(LISTEN\)", line)
+            if match:
+                return int(match.group(1))
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return None
+
+
+def process_cwd(pid) -> str | None:
+    """从进程本身查询工作目录（lsof 不可用时返回 None）"""
+    try:
+        output = subprocess.run(
+            ["lsof", "-a", "-p", str(pid), "-d", "cwd", "-Fn"],
+            capture_output=True,
+            text=True,
+            timeout=3,
+        ).stdout
+        for line in output.splitlines():
+            if line.startswith("n/"):
+                return line[1:]
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return None
+
+
+def print_status(pid, base_path: str) -> None:
+    """打印服务进程信息：PID、从进程查询的端口、URL"""
+    print(f"  PID:   {pid}", flush=True)
+    port = process_port(pid)
+    if port:
+        print(f"  端口:  {port}", flush=True)
+        print(f"  URL:   http://localhost:{port}{base_path}/", flush=True)
+    project = process_cwd(pid) or str(Path.cwd())
+    print(f"  项目:  {project}", flush=True)
+
+
+def cmd_status(args) -> int:
+    """显示当前服务状态"""
+    pid = load_pid()
+    if not pid or not is_alive(pid):
+        if pid:
+            clear_pid()
+        print("ProMentor Dashboard: 未运行", flush=True)
+        return 0
+    print("ProMentor Dashboard: 运行中", flush=True)
+    print_status(pid, args.base_path)
+    return 0
+
+
+def cmd_stop() -> int:
+    """停止服务进程"""
+    pid = load_pid()
+    if not pid or not is_alive(pid):
+        if pid:
+            clear_pid()
+        print("ProMentor Dashboard: 未运行，无需停止", flush=True)
+        return 0
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except ProcessLookupError:
+        clear_pid()
+        print(f"ProMentor Dashboard: 已停止（PID {pid}）", flush=True)
+        return 0
+    for _ in range(30):
+        if not is_alive(pid):
+            break
+        time.sleep(0.1)
+    clear_pid()
+    if is_alive(pid):
+        print(f"警告：进程 {pid} 未在 3 秒内退出，请手动 kill -9 {pid}", flush=True)
+        return 1
+    print(f"ProMentor Dashboard: 已停止（PID {pid}）", flush=True)
+    return 0
+
+
+def cmd_start(args) -> int:
+    """启动服务：部署产物、找端口、后台运行、打开浏览器"""
     signal.signal(signal.SIGTERM, handle_term)
+
+    existing = load_pid()
+    if existing and is_alive(existing):
+        print("ProMentor Dashboard: 已在运行", flush=True)
+        print_status(existing, args.base_path)
+        return 0
+
     project = project_root()
     deploy(project, assets_dir(), args.force)
     port = free_port(args.port)
@@ -160,30 +309,44 @@ def main(argv=None):
         print(f"错误：无法绑定端口 {port}（{exc}）", flush=True)
         sys.exit(1)
 
-    if args.daemon:
-        pid = daemonize(args.log)
-        if pid > 0:
-            print(f"服务已后台启动: PID={pid}", flush=True)
-            print(f"日志: {args.log}", flush=True)
-            print("读取日志获取访问 URL", flush=True)
-            sys.exit(0)
-        Path(PID_PATH).write_text(str(os.getpid()))
+    if args.foreground:
         print(f"ProMentor Dashboard: {url}", flush=True)
-        print("停止服务: kill $(cat /tmp/promentor-dashboard.pid)", flush=True)
-    else:
-        print(f"ProMentor Dashboard: {url}", flush=True)
-        print("如浏览器无法访问 localhost，请改用 127.0.0.1", flush=True)
         print("按 Ctrl+C 停止服务", flush=True)
+        httpd.serve_forever()
+        return 0
 
+    pid = daemonize()
+    if pid > 0:
+        # 父进程：报告进程信息并打开浏览器
+        print("ProMentor Dashboard: 运行中", flush=True)
+        print(f"  PID:   {pid}", flush=True)
+        print(f"  端口:  {port}", flush=True)
+        print(f"  URL:   {url}", flush=True)
+        if not args.no_open:
+            open_browser(url)
+        return 0
+
+    # 子进程：写 PID 并持续服务
+    Path(PID_PATH).write_text(str(os.getpid()))
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
         httpd.server_close()
-        if args.daemon:
-            Path(PID_PATH).unlink(missing_ok=True)
+        clear_pid()
+    return 0
+
+
+def main(argv=None):
+    """入口：按命令分发 start / status / stop"""
+    args = parse_args(argv)
+    if args.command in ("stop", "kill", "shutdown"):
+        return cmd_stop()
+    if args.command == "status":
+        return cmd_status(args)
+    return cmd_start(args)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
