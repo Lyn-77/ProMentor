@@ -5,7 +5,7 @@
  ProMentor Dashboard Server
 --------------------------------------------------------------------------
  挂载并管理 ProMentor Dashboard 进程：
-   - start:   部署产物、从 3000 起找最小可用端口、后台启动、打开浏览器
+   - start:   直接服务技能包内产物 + 项目根数据、后台启动、打开浏览器
    - status:  显示运行中的服务进程（PID/端口/URL）
    - stop:    停止服务（kill / shutdown 同义）
  无状态：不写 JSON、不写日志，仅用 PID 文件定位进程。
@@ -17,7 +17,6 @@
    python3 <promentor-skill>/serve.py stop            # 停止
    python3 <promentor-skill>/serve.py kill            # 同 stop
    python3 <promentor-skill>/serve.py shutdown        # 同 stop
-   python3 <promentor-skill>/serve.py start --force   # 强制刷新产物后启动
    python3 <promentor-skill>/serve.py start --port 4000
    python3 <promentor-skill>/serve.py start --no-open # 启动但不打开浏览器
    python3 <promentor-skill>/serve.py start --foreground
@@ -30,13 +29,13 @@ from functools import partial
 import http.server
 import os
 import re
-import shutil
 import signal
 import socket
 import subprocess
 import sys
 import time
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 DEFAULT_PORT = 3000
 BASE_PATH = "/dashboard"
@@ -50,27 +49,61 @@ class ProMentorServer(http.server.ThreadingHTTPServer):
     allow_reuse_address = True
 
 
-class SPAHandler(http.server.SimpleHTTPRequestHandler):
-    """静态服务器 + SPA fallback：未生成的章节路由返回主页壳，由客户端按路径渲染"""
+class ProMentorHandler(http.server.SimpleHTTPRequestHandler):
+    """双根静态服务器：
+    - /dashboard/*  -> 技能包内的构建产物（不向项目复制任何文件）
+    - /.promentor/* -> 当前项目根目录的课程数据
+    - 章节路由 SPA fallback：产物中不存在的路径返回主页壳
+    """
 
-    def __init__(self, *args, base_path=BASE_PATH, **kwargs):
+    def __init__(self, *args, assets=None, project=None, base_path=BASE_PATH, **kwargs):
+        self.assets = Path(assets).resolve()
+        self.project = Path(project).resolve()
         self.base_path = base_path
         super().__init__(*args, **kwargs)
 
+    def _safe(self, root: Path, rel: str) -> str:
+        """将相对路径解析到 root 内，防止路径穿越"""
+        target = (root / rel).resolve()
+        if not str(target).startswith(str(root)):
+            return str(root)
+        return str(target)
+
+    def translate_path(self, path):
+        path = unquote(urlsplit(path).path)
+        if path.startswith(f"{self.base_path}/"):
+            rel = path[len(self.base_path):].lstrip("/")
+            return self._safe(self.assets, rel)
+        if path.startswith("/.promentor/"):
+            rel = path[len("/.promentor/"):]
+            return self._safe(self.project / ".promentor", rel)
+        return self._safe(self.assets, path.lstrip("/"))
+
+    def _redirect_home(self):
+        if self.path in ("/", self.base_path):
+            self.send_response(302)
+            self.send_header("Location", f"{self.base_path}/")
+            self.end_headers()
+            return True
+        return False
+
     def _spa_fallback(self):
-        if not self.path.startswith(self.base_path):
-            return
         if self.path.startswith(f"{self.base_path}/_next/"):
             return
-        if os.path.exists(self.translate_path(self.path)):
+        if os.path.isfile(self.translate_path(self.path)):
             return
-        self.path = f"{self.base_path}/index.html"
+        if self.path == "/" or self.path.startswith(f"{self.base_path}/"):
+            self.path = f"{self.base_path}/index.html"
 
     def do_GET(self):
+        if self._redirect_home():
+            return
         self._spa_fallback()
         super().do_GET()
 
     def do_HEAD(self):
+        if self._redirect_home():
+            return
         self._spa_fallback()
         super().do_HEAD()
 
@@ -90,11 +123,6 @@ def parse_args(argv):
         type=int,
         default=DEFAULT_PORT,
         help=f"起始端口（默认 {DEFAULT_PORT}，被占用时自动向下找最小可用端口）",
-    )
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="强制刷新项目中的 dashboard 产物",
     )
     parser.add_argument(
         "--base-path",
@@ -131,18 +159,6 @@ def assets_dir() -> Path:
         print(f"错误：未找到构建产物（{assets}）")
         sys.exit(1)
     return assets
-
-
-def deploy(project: Path, assets: Path, force: bool) -> Path:
-    """复制产物到项目根 dashboard/，已存在且非 force 时直接复用"""
-    target = project / "dashboard"
-    if target.is_dir() and not force:
-        return target
-    if target.exists():
-        shutil.rmtree(target)
-    shutil.copytree(assets, target)
-    print(f"已部署产物: {target}", flush=True)
-    return target
 
 
 def free_port(start: int) -> int:
@@ -333,11 +349,16 @@ def cmd_start(args) -> int:
             return 0
 
     project = project_root()
-    deploy(project, assets_dir(), args.force)
+    assets = assets_dir()
     port = free_port(args.port)
     url = f"http://localhost:{port}{args.base_path}/"
 
-    handler = partial(SPAHandler, base_path=args.base_path)
+    handler = partial(
+        ProMentorHandler,
+        assets=assets,
+        project=project,
+        base_path=args.base_path,
+    )
     try:
         httpd = ProMentorServer(("::", port), handler)
     except OSError as exc:
