@@ -154,7 +154,7 @@ argument-hint: "<init | learn | test | hint | submit | review | progress>"
       }
     ]
   },
-  "test_command": "cd .promentor/labs/ch02-router && go test -v -json ./..."
+  "test_command": "cd .promentor/chapters/ch02-router && go test -v -json ./..."
 }
 ```
 
@@ -342,7 +342,7 @@ ProMentor: {项目名}  ({language})
 
 结尾：
 ```
-打开 .promentor/labs/{chapter_id}/ 开始实现。
+打开 .promentor/chapters/{chapter_id}/ 开始实现。
 写完告诉我，我帮你跑测试。
 ```
 
@@ -691,7 +691,7 @@ Review 的核心价值在于**对比**。学生看到了自己的实现能跑，
 2. 用目标语言的原生测试框架
 3. 覆盖：正常路径、边界情况、错误处理
 4. 测试代码中 import 学生的包路径
-5. 测试文件放在 `.promentor/labs/{chapter_id}/` 下
+5. 测试文件放在 `.promentor/chapters/{chapter_id}/` 下
 6. 测试必须能独立编译和运行
 
 **hints.json 生成**：
@@ -714,7 +714,7 @@ package router_test
 
 import (
     "testing"
-    student "github.com/user/project/.promentor/labs/ch02-router"
+    student "github.com/user/project/.promentor/chapters/ch02-router"
 )
 
 func TestStaticRoute(t *testing.T) {
@@ -736,7 +736,7 @@ func TestStaticRoute(t *testing.T) {
 ```python
 import pytest
 import sys
-sys.path.insert(0, ".promentor/labs/ch02-router")
+sys.path.insert(0, ".promentor/chapters/ch02-router")
 from router import Router
 
 def test_static_route():
