@@ -11,5 +11,6 @@ __pycache__/
 
 # 本地开发课程数据（不进仓库、不进构建产物）
 /dashboard/public/prom-data/
+/dashboard/.prom-data-stash/
 
 .promentor

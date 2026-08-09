@@ -14,6 +14,7 @@
 
 import { execSync } from "node:child_process"
 import fs from "node:fs"
+import os from "node:os"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -27,12 +28,12 @@ const basePath = basePathArg ? basePathArg.split("=")[1] : "/dashboard"
 console.log(`▶ 构建 dashboard（部署子路径: ${basePath}）`)
 
 // 开发数据目录（public/prom-data）不进构建产物：产物不内嵌课程数据
+// 暂存目录必须放在 public 之外，否则 Next 会把暂存数据一并复制进产物
 const devData = path.join(root, "public", "prom-data")
-const devDataStash = path.join(root, "public", ".prom-data-stash")
-let moved = false
+let stashDir = null
 if (fs.existsSync(devData)) {
-  fs.renameSync(devData, devDataStash)
-  moved = true
+  stashDir = fs.mkdtempSync(path.join(os.tmpdir(), "prom-data-"))
+  fs.renameSync(devData, path.join(stashDir, "prom-data"))
 }
 
 try {
@@ -42,8 +43,8 @@ try {
     stdio: "inherit",
   })
 } finally {
-  if (moved) {
-    fs.renameSync(devDataStash, devData)
+  if (stashDir) {
+    fs.renameSync(path.join(stashDir, "prom-data"), devData)
   }
 }
 
