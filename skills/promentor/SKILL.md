@@ -251,12 +251,16 @@ Final: 组装 Mini Gin        [hard]  把所有组件拼成一个可用的框架
 
 1. 写入 `course.json` 和 `progress.json`（所有 Chapter 状态为 `not_started`）
 2. 追加 `.promentor/` 到 `.gitignore`
-3. 展示完成面板：
+3. 自动启动仪表盘：在项目根目录执行 `python3 <promentor-skill>/serve.py`
+4. 从脚本输出提取访问 URL（如 `http://localhost:3000/dashboard/`），展示给用户——
+   Agent 对话与浏览器网页均可查看课程
+5. 展示完成面板：
 ```
 🎓 课程已生成：{项目名} —— {N} 个 Chapter
 
 启动学习：/promentor learn ch01-<slug>
 查看进度：/promentor progress
+网页面板：{dashboard URL}
 ```
 
 ### 2.2 `/promentor`（课程面板）
@@ -303,7 +307,13 @@ ProMentor: {项目名}  ({language})
 1. 读取 `progress.json`
 2. 如果该 Chapter 有未完成的 prerequisites，警告用户但允许继续
 
-**第三步：教学**
+**第三步：自动启动仪表盘**
+
+1. 在项目根目录执行 `python3 <promentor-skill>/serve.py`（若已在运行，脚本会提示并显示进程信息）
+2. 从脚本输出提取访问 URL，并附当前章节直达链接：`{URL}chapters/{chapter_id}/`
+3. 告知用户：Agent 对话与浏览器网页均可查看本课讲义与源码导读
+
+**第四步：教学**
 
 按以下结构展开教学：
 
@@ -315,10 +325,11 @@ ProMentor: {项目名}  ({language})
 结尾：
 ```
 打开 .promentor/chapters/{chapter_id}/ 开始实现。
+网页讲义：{dashboard URL}chapters/{chapter_id}/
 写完告诉我，我帮你跑测试。
 ```
 
-**第四步：更新进度**
+**第五步：更新进度**
 
 - 如果该 Chapter 状态为 `not_started`，更新为 `in_progress`
 - 更新 `current_chapter` 字段
