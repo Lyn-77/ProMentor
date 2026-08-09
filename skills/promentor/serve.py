@@ -319,9 +319,18 @@ def cmd_start(args) -> int:
 
     existing = load_pid()
     if existing and is_alive(existing):
-        print("ProMentor Dashboard: 已在运行", flush=True)
-        print_status(existing, args.base_path)
-        return 0
+        current_project = process_cwd(existing)
+        if current_project and current_project != str(Path.cwd()):
+            print(
+                f"仪表盘正在服务其他项目（{current_project}）",
+                flush=True,
+            )
+            print("自动切换为当前项目（停止旧进程并重新启动）", flush=True)
+            cmd_stop()
+        else:
+            print("ProMentor Dashboard: 已在运行", flush=True)
+            print_status(existing, args.base_path)
+            return 0
 
     project = project_root()
     deploy(project, assets_dir(), args.force)

@@ -309,7 +309,7 @@ ProMentor: {项目名}  ({language})
 
 **第三步：自动启动仪表盘**
 
-1. 在项目根目录执行 `python3 <promentor-skill>/serve.py`（若已在运行，脚本会提示并显示进程信息）
+1. 在项目根目录执行 `python3 <promentor-skill>/serve.py`（**全局单进程**：若当前项目已有服务，脚本输出"已在运行"并显示进程信息，不会重复启动；若服务运行在其他项目，脚本会自动切换为当前项目）
 2. 从脚本输出提取访问 URL，并附当前章节直达链接：`{URL}chapters/{chapter_id}/`
 3. 告知用户：Agent 对话与浏览器网页均可查看本课讲义与源码导读
 
