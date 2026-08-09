@@ -68,7 +68,14 @@ export interface ChapterContent {
   source: string | null
 }
 
-const PROM_ROOT = "/.promentor"
+// 数据根：basePath 会影响所有静态资源，public 文件挂在 /dashboard/ 前缀下。
+// - 开发：课程数据放 public/prom-data，路径为 <basePath>/prom-data
+// - 产物：静态服务器根=项目根，数据仍是项目根下的 .promentor/，不受 basePath 影响
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "/dashboard"
+const PROM_ROOT =
+  process.env.NODE_ENV === "development"
+    ? `${BASE_PATH}/prom-data`
+    : "/.promentor"
 const REQUIRED_FILES: Record<keyof ChapterFiles, string> = {
   lecture: "lecture.md",
   source: "source.md",

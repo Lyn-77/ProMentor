@@ -1,0 +1,45 @@
+{
+  "chapter_id": "ch00-setup",
+  "title": "环境搭建与最小 TUI",
+  "description": "实现一个最小的 Bubble Tea 计数器程序，理解 Model/Msg/Update/View 循环",
+  "language": "go",
+  "package": "tuikit",
+  "files": [
+    {
+      "path": "tuikit.go",
+      "description": "计数器 Model 的核心实现"
+    }
+  ],
+  "interface": {
+    "types": [
+      {
+        "name": "Model",
+        "kind": "struct",
+        "doc": "计数器模型，持有 count 状态"
+      }
+    ],
+    "functions": [
+      {
+        "signature": "func New() Model",
+        "doc": "创建初始 Model，count 为 0"
+      },
+      {
+        "signature": "func (m Model) Count() int",
+        "doc": "返回当前计数值（供测试观察）"
+      },
+      {
+        "signature": "func (m Model) Init() tea.Cmd",
+        "doc": "初始化命令，返回 nil 即可"
+      },
+      {
+        "signature": "func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd)",
+        "doc": "j/down 使 count+1；q 返回 tea.Quit；其余消息无变化"
+      },
+      {
+        "signature": "func (m Model) View() string",
+        "doc": "渲染当前计数值的文本视图"
+      }
+    ]
+  },
+  "test_command": "cd {chapter_dir} && go test -v ./..."
+}

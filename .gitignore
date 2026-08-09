@@ -9,5 +9,7 @@
 __pycache__/
 *.pyc
 
-# Dashboard 源码（独立仓库，只分发 skills/promentor/dashboard 构建产物）
-/dashboard/
+# 本地开发课程数据（不进仓库、不进构建产物）
+/dashboard/public/prom-data/
+
+.promentor

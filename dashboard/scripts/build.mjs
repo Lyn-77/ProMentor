@@ -26,11 +26,26 @@ const basePath = basePathArg ? basePathArg.split("=")[1] : "/dashboard"
 
 console.log(`▶ 构建 dashboard（部署子路径: ${basePath}）`)
 
-execSync("pnpm exec next build", {
-	cwd: root,
-	env: { ...process.env, NEXT_PUBLIC_BASE_PATH: basePath },
-	stdio: "inherit",
-})
+// 开发数据目录（public/prom-data）不进构建产物：产物不内嵌课程数据
+const devData = path.join(root, "public", "prom-data")
+const devDataStash = path.join(root, "public", ".prom-data-stash")
+let moved = false
+if (fs.existsSync(devData)) {
+  fs.renameSync(devData, devDataStash)
+  moved = true
+}
+
+try {
+  execSync("pnpm exec next build", {
+    cwd: root,
+    env: { ...process.env, NEXT_PUBLIC_BASE_PATH: basePath },
+    stdio: "inherit",
+  })
+} finally {
+  if (moved) {
+    fs.renameSync(devDataStash, devData)
+  }
+}
 
 fs.rmSync(targetDir, { recursive: true, force: true })
 fs.cpSync(outDir, targetDir, { recursive: true })

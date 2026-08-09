@@ -1,0 +1,43 @@
+{
+  "chapter_id": "ch05-async-batch-wake",
+  "title": "异步任务与批量唤醒",
+  "description": "用 tea.Cmd 闭包封装副作用，WaitGroup 并发扇出批量任务，结果聚合为一条消息",
+  "language": "go",
+  "package": "batch",
+  "files": [
+    {
+      "path": "batch.go",
+      "description": "批量异步唤醒核心实现"
+    }
+  ],
+  "interface": {
+    "types": [
+      {
+        "name": "WakeFunc",
+        "kind": "type",
+        "doc": "type WakeFunc func(name string) error，注入的唤醒副作用函数"
+      },
+      {
+        "name": "Result",
+        "kind": "struct",
+        "doc": "单次唤醒结果。字段：Name string; Err error"
+      },
+      {
+        "name": "BatchMsg",
+        "kind": "struct",
+        "doc": "批量唤醒完成消息。字段：Results []Result"
+      }
+    ],
+    "functions": [
+      {
+        "signature": "func BatchWake(names []string, wake WakeFunc) []Result",
+        "doc": "并发执行所有 wake，返回结果列表，位置与输入 names 对齐。某个失败不影响其他"
+      },
+      {
+        "signature": "func WakeCmd(names []string, wake WakeFunc) tea.Cmd",
+        "doc": "返回 func() tea.Msg 闭包：后台执行 BatchWake，结果包装为 BatchMsg"
+      }
+    ]
+  },
+  "test_command": "cd {chapter_dir} && go test -v ./..."
+}

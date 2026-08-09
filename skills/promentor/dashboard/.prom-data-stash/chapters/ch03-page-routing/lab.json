@@ -1,0 +1,87 @@
+{
+  "chapter_id": "ch03-page-routing",
+  "title": "页面路由 · Update 返回下一页",
+  "description": "实现顶层模型委托模式：页面用返回值决定下一页，消除集中式路由 switch",
+  "language": "go",
+  "package": "pages",
+  "files": [
+    {
+      "path": "pages.go",
+      "description": "Top 委托模型 + PageA/PageB 页面实现"
+    }
+  ],
+  "interface": {
+    "types": [
+      {
+        "name": "Top",
+        "kind": "struct",
+        "doc": "顶层委托模型，持有当前页面（tea.Model）"
+      },
+      {
+        "name": "PageA",
+        "kind": "struct",
+        "doc": "页面 A：j 计数，n 跳转到 B"
+      },
+      {
+        "name": "PageB",
+        "kind": "struct",
+        "doc": "页面 B：k 计数，p 跳转到 A"
+      }
+    ],
+    "functions": [
+      {
+        "signature": "func New() Top",
+        "doc": "创建 Top，初始页面为 PageA"
+      },
+      {
+        "signature": "func (m Top) Init() tea.Cmd",
+        "doc": "透传给当前页面"
+      },
+      {
+        "signature": "func (m Top) View() string",
+        "doc": "透传给当前页面"
+      },
+      {
+        "signature": "func (m Top) Update(msg tea.Msg) (tea.Model, tea.Cmd)",
+        "doc": "q 返回 tea.Quit；其余消息委托给当前页面，页面返回的新页面成为下一页"
+      },
+      {
+        "signature": "func (m Top) CurrentPage() string",
+        "doc": "返回当前页面标识，\"A\" 或 \"B\""
+      },
+      {
+        "signature": "func (m Top) PageAVisits() int",
+        "doc": "当前页面是 A 时返回其 visits，否则返回 -1"
+      },
+      {
+        "signature": "func (m Top) PageBVisits() int",
+        "doc": "当前页面是 B 时返回其 visits，否则返回 -1"
+      },
+      {
+        "signature": "func (m PageA) Init() tea.Cmd",
+        "doc": "返回 nil"
+      },
+      {
+        "signature": "func (m PageA) Update(msg tea.Msg) (tea.Model, tea.Cmd)",
+        "doc": "j/down 使 visits+1；n 返回 PageB{}；其余消息原样返回自身"
+      },
+      {
+        "signature": "func (m PageA) View() string",
+        "doc": "渲染页面 A 的视图"
+      },
+      {
+        "signature": "func (m PageB) Init() tea.Cmd",
+        "doc": "返回 nil"
+      },
+      {
+        "signature": "func (m PageB) Update(msg tea.Msg) (tea.Model, tea.Cmd)",
+        "doc": "k/up 使 visits+1；p 返回 PageA{}；其余消息原样返回自身"
+      },
+      {
+        "signature": "func (m PageB) View() string",
+        "doc": "渲染页面 B 的视图"
+      }
+    ]
+  },
+  "test_command": "cd {chapter_dir} && go test -v ./..."
+}

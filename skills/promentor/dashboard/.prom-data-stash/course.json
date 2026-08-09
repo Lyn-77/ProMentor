@@ -1,0 +1,135 @@
+{
+  "project": "WakeUp",
+  "language": "go",
+  "generated_at": "2026-08-09T00:00:00Z",
+  "chapters": [
+    {
+      "id": "ch00-setup",
+      "title": "环境搭建与最小 TUI",
+      "difficulty": "easy",
+      "prerequisites": [],
+      "learning_goals": [
+        "理解 Bubble Tea 的 Model/Msg/Update/View 循环",
+        "掌握 tea.Cmd 作为副作用描述",
+        "跑通第一个可运行 TUI"
+      ],
+      "source_files": ["main.go:1-108", "ui/ui.go:28-36"],
+      "lab_interface": {
+        "package": "tuikit",
+        "exports": ["New", "Model.Count", "Model.Init", "Model.Update", "Model.View"]
+      }
+    },
+    {
+      "id": "ch01-wol-magic-packet",
+      "title": "WOL 魔术包协议",
+      "difficulty": "easy",
+      "prerequisites": ["ch00-setup"],
+      "learning_goals": [
+        "理解 102 字节魔术包格式",
+        "掌握纯函数构造与 UDP 发送分离",
+        "掌握错误返回的 Go 惯用法"
+      ],
+      "source_files": ["wol/wol.go:1-74"],
+      "lab_interface": {
+        "package": "wol",
+        "exports": ["SendMagicPacket", "MagicPacketLen"]
+      }
+    },
+    {
+      "id": "ch02-store-persistence",
+      "title": "Store 持久化层",
+      "difficulty": "mid",
+      "prerequisites": ["ch00-setup"],
+      "learning_goals": [
+        "内存唯一真相 + 异步落盘",
+        "并发安全的 CRUD 设计",
+        "纯校验函数与错误哨兵"
+      ],
+      "source_files": ["store/store.go:1-274"],
+      "lab_interface": {
+        "package": "store",
+        "exports": ["Device", "Store", "New", "Add", "Update", "Delete", "FindByName", "FindByIndex", "List", "Count", "Save", "ValidateMAC", "ValidatePort", "ValidateIP", "ValidateName"]
+      }
+    },
+    {
+      "id": "ch03-page-routing",
+      "title": "页面路由 · Update 返回下一页",
+      "difficulty": "hard",
+      "prerequisites": ["ch00-setup", "ch02-store-persistence"],
+      "learning_goals": [
+        "顶层模型委托模式",
+        "消除顶层 switch 的路由设计",
+        "页面自治：Update 决定下一页"
+      ],
+      "source_files": ["main.go:36-73", "ui/menu.go:144-167"],
+      "lab_interface": {
+        "package": "pages",
+        "exports": ["Top", "New", "PageA", "PageB", "Top.Update", "Top.CurrentPage", "Top.PageAVisits", "Top.PageBVisits"]
+      }
+    },
+    {
+      "id": "ch04-modal-state-machine",
+      "title": "模态状态机",
+      "difficulty": "hard",
+      "prerequisites": ["ch03-page-routing"],
+      "learning_goals": [
+        "模态字段驱动行为切换",
+        "dd 双键序列检测",
+        "消除键位语义重叠"
+      ],
+      "source_files": ["ui/list.go:168-304", "ui/ui.go:28-36"],
+      "lab_interface": {
+        "package": "modal",
+        "exports": ["Model", "New", "Mode", "Model.Update", "Model.Cursor", "Model.Mode", "Model.Selected", "Model.Items"]
+      }
+    },
+    {
+      "id": "ch05-async-batch-wake",
+      "title": "异步任务与批量唤醒",
+      "difficulty": "mid",
+      "prerequisites": ["ch04-modal-state-machine", "ch01-wol-magic-packet"],
+      "learning_goals": [
+        "tea.Cmd 闭包封装副作用",
+        "WaitGroup 并发扇出",
+        "结果聚合消息"
+      ],
+      "source_files": ["ui/list.go:608-662"],
+      "lab_interface": {
+        "package": "batch",
+        "exports": ["Result", "BatchMsg", "WakeFunc", "BatchWake", "WakeCmd"]
+      }
+    },
+    {
+      "id": "ch06-form-validation",
+      "title": "表单与双重校验",
+      "difficulty": "mid",
+      "prerequisites": ["ch03-page-routing", "ch02-store-persistence"],
+      "learning_goals": [
+        "实时宽松校验 vs 提交严格校验",
+        "默认值替换",
+        "焦点管理"
+      ],
+      "source_files": ["ui/form.go:254-416"],
+      "lab_interface": {
+        "package": "form",
+        "exports": ["Model", "New", "Model.Update", "Model.Value", "Model.Error", "Model.Focus", "Model.Submitted", "Model.SubmittedPort"]
+      }
+    },
+    {
+      "id": "ch07-final-assembly",
+      "title": "组装 WakeUp",
+      "difficulty": "hard",
+      "prerequisites": ["ch05-async-batch-wake", "ch06-form-validation", "ch04-modal-state-machine"],
+      "learning_goals": [
+        "组合 store + wol + 页面",
+        "完整模态流程",
+        "端到端组装"
+      ],
+      "source_files": ["main.go:1-108", "ui/list.go:1-662"],
+      "lab_interface": {
+        "package": "app",
+        "exports": ["Device", "Store", "WakeFunc", "App", "NewStore", "NewApp", "App.Update", "App.View", "App.Cursor", "App.Mode", "App.Items", "App.WakeCount"]
+      }
+    }
+  ]
+}
