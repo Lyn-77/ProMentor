@@ -12,19 +12,19 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 （包含 `SKILL.md`、`agents/openai.yaml`、`references/`、`scripts/serve.py`
 与构建好的 `assets/dashboard/` 静态站点，不含 Next.js 源码）
 
-不需要安装任何依赖。不需要数据库。ProMentor 只是告诉 AI 怎么当一个好老师。
+不需要数据库，运行时仅需 Python 3 标准库（重新构建网页才需要 Node.js/pnpm）。ProMentor 只是告诉 AI 怎么当一个好老师。
 
 ### 同步到本机已安装副本（Codex）
 
 仓库 `skills/promentor/` 是唯一事实来源。修改后同步到 Codex 技能目录：
 
 ```bash
-rsync -a --delete skills/promentor/ ~/.codex/skills/promentor/
+rsync -a --delete skills/promentor/ ~/.agents/skills/promentor/
 ```
 
 ## 使用
 
-在 Claude Code 中打开你的项目，然后：
+在 Codex、Claude Code 等支持 `/promentor` 命令的 AI 编程助手中打开你的项目，然后：
 
 ### 1. 生成课程
 

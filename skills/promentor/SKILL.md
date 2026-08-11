@@ -53,6 +53,8 @@ description: 把任意项目转成 MIT 风格的动手工程课程：生成大�
 
 **完整字段规范（JSON 示例、逐字段说明）**：读写课程数据前阅读 `references/data-format.md`。
 
+示例语言仅作演示，数据格式规则与项目语言无关。
+
 ## 2. 命令实现
 
 ### 2.1 `/promentor init`
@@ -104,6 +106,7 @@ Final: 组装 Mini Gin        [hard]  把所有组件拼成一个可用的框架
 2. `source.md` —— 标注关键源码行
 3. `lab.json` —— 定义接口签名
 4. `lab_test.<ext>` —— 行为测试（详见 `references/generation.md`）
+5. （仅 Final/组装章）可运行入口 —— 按目标语言惯例生成在课程根目录（详见 `references/generation.md`）
 
 生成完一个 Chapter 后，汇报进度（"Ch 1/5 已生成..."），继续下一个。
 
@@ -474,8 +477,9 @@ Review 的核心价值在于**对比**。学生看到了自己的实现能跑，
 1. 四轮扫描法：结构探测 → 核心类型识别 → 调用链追踪 → 架构归纳
 2. 大项目裁剪（>200 文件）：拓扑聚焦、功能去重、P0/P1/P2 优先级
 3. 难度评级：easy / mid / hard 判定标准
-4. Chapter 生成规范：lecture.md / source.md / lab.json / lab_test.<ext>
+4. Chapter 生成规范：lecture.md / source.md / lab.json / lab_test.<ext> / Final 可运行入口
 5. 测试生成规范：黑盒原则、Go/Python 示例、关键约束
+6. 跨章 lab 依赖解耦：前置依赖、占位解耦、禁止循环引用
 
 init 主流程：扫描项目 → 展示大纲等用户确认 → 逐 Chapter 生成 → 写入 course.json / progress.json → 追加 .gitignore → 启动仪表盘。
 
