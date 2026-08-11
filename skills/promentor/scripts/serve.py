@@ -153,8 +153,8 @@ def project_root() -> Path:
 
 
 def assets_dir() -> Path:
-    """构建产物：技能包 assets/dashboard/"""
-    assets = Path(__file__).resolve().parent.parent / "assets" / "dashboard"
+    """构建产物：技能包 dashboard/"""
+    assets = Path(__file__).resolve().parent.parent / "dashboard"
     if not assets.is_dir():
         print(f"错误：未找到构建产物（{assets}）")
         sys.exit(1)

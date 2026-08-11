@@ -393,7 +393,7 @@ python3 <promentor-skill>/scripts/serve.py
 
 脚本自动完成：
 1. 从 3000 起自动寻找最小可用端口（被占用则 3001、3002 …）
-2. 直接服务技能包内的 `assets/dashboard/` 产物——**不向项目复制任何文件**，网页只存在于技能包内
+2. 直接服务技能包内的 `dashboard/` 产物——**不向项目复制任何文件**，网页只存在于技能包内
 3. 网页运行时读取当前项目根目录的 `.promentor/` 数据
 4. 后台启动静态服务器并打开浏览器
 
@@ -437,10 +437,10 @@ python3 <promentor-skill>/scripts/serve.py stop
 产物是通用静态站点，不内嵌任何课程数据，无需为每个项目重新构建。修改源码后重建：
 
 ```
-cd dashboard && node scripts/build.mjs [--base-path=/子路径]
+cd dashboard && pnpm build:dashboard
 ```
 
-构建产物输出到技能包 `assets/dashboard/`，只分发构建产物，不含源码。
+构建产物输出到技能包 `dashboard/`，只分发构建产物，不含源码。
 
 ## 3. 教学策略
 

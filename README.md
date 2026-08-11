@@ -8,11 +8,22 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 
 ## 安装
 
-将 `skills/promentor/` 整个目录复制到 `.{YourAgent}/skills/promentor`
-（包含 `SKILL.md`、`agents/openai.yaml`、`references/`、`scripts/serve.py`
-与构建好的 `assets/dashboard/` 静态站点，不含 Next.js 源码）
+技能包不包含网页构建产物，仪表盘通过以下任一方式获得：
 
-不需要数据库，运行时仅需 Python 3 标准库（重新构建网页才需要 Node.js/pnpm）。ProMentor 只是告诉 AI 怎么当一个好老师。
+### 方式一：从 Release 解压（推荐）
+
+1. 前往 [Releases](https://github.com/Lyn-77/ProMentor/releases) 下载最新 `promentor-skill-<版本>.tar.gz`
+2. 解压后把 `promentor/` 放到 `.{YourAgent}/skills/promentor`（Codex：`~/.agents/skills/promentor`）
+
+### 方式二：从源码构建
+
+需要 Node.js 与 pnpm：
+
+1. `cd dashboard && pnpm install && pnpm build:dashboard`
+2. 将整个 `skills/promentor/` 目录复制到 `.{YourAgent}/skills/promentor`
+   （构建产物会自动输出到 `skills/promentor/dashboard/`）
+
+运行时仅需 Python 3 标准库，不需要数据库。ProMentor 只是告诉 AI 怎么当一个好老师。
 
 ### 同步到本机已安装副本（Codex）
 
@@ -104,7 +115,7 @@ AI 对比你的实现 vs 原始源码，解释设计决策、"为什么这样做
 **架构**
 
 - 全局单进程：重复启动复用已有进程，在另一个项目学习时自动切换
-- 网页只存在于技能包 `assets/dashboard/` 内，不复制到项目目录；服务启动时读取项目根目录的 `.promentor/` 数据
+- 网页只存在于技能包 `dashboard/` 内，不复制到项目目录；服务启动时读取项目根目录的 `.promentor/` 数据
 
 使用方式：
 
