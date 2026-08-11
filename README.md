@@ -17,13 +17,14 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 
 需要 Node.js 与 pnpm：
 
-```
-1. cd dashboard
-2. pnpm install
-3. pnpm build:dashboard
+```bash
+cd dashboard
+pnpm install
+pnpm build:dashboard
 ```
 
-2. 将整个 `skills/promentor/` 目录复制到 `.{YourAgent}/skills/promentor`
+然后，将整个 `skills/promentor/` 目录复制到 `.{YourAgent}/skills/promentor`
+（构建产物会自动输出到 `skills/promentor/dashboard/`）
 
 运行时仅需 Python 3 标准库
 
