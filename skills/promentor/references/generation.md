@@ -147,6 +147,15 @@
 5. 测试文件放在 `.promentor/chapters/{chapter_id}/` 下
 6. 测试必须能独立编译和运行
 
+**main 入口生成（Final/组装章）**：
+
+Final 章组装出顶层模型后，必须额外生成一个可运行入口，让课程"学完即能跑"：
+
+1. 入口文件放在课程根目录 `.promentor/main.go`（package main），不放入章节目录，避免与章节主包（package app 等）冲突
+2. 只做三件事：初始化数据层、构造顶层模型、启动运行时（如 `tea.NewProgram`）
+3. 在 `lab.json` notes 中给出运行命令（如 `go run .promentor`）
+4. 生成后用 `go build` 验证入口可编译，确保课程结束后项目可运行
+
 ## 4.5 测试生成规范
 
 **黑盒原则**：不关心学生怎么实现，只关心输入输出是否正确。
