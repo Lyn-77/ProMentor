@@ -10,7 +10,7 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 
 ### 方式一：从 Release 解压（推荐）
 
-1. 前往 [Releases](https://github.com/Lyn-77/ProMentor/releases) 下载最新 `promentor-skill-<版本>.tar.gz`
+1. 前往 [Releases](https://github.com/Lyn-77/ProMentor/releases) 下载最新 `promentor-skill-<版本>.zip`
 2. 解压后把 `promentor/` 放到 `.{YourAgent}/skills/promentor`
 
 ### 方式二：从源码构建
