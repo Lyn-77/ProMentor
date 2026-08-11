@@ -14,6 +14,7 @@ __pycache__/
 /dashboard/.prom-data-stash/
 
 .promentor
+promentor.zip
 
 # 技能包构建产物（不入库，由 Release 压缩包或源码构建分发）
 skills/promentor/dashboard/
