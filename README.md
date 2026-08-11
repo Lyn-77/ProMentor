@@ -9,9 +9,18 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 ## 安装
 
 将 `skills/promentor/` 整个目录复制到 `.{YourAgent}/skills/promentor`
-（包含 `SKILL.md`、`serve.py` 与构建好的 `dashboard/` 静态站点，不含 Next.js 源码）
+（包含 `SKILL.md`、`agents/openai.yaml`、`references/`、`scripts/serve.py`
+与构建好的 `assets/dashboard/` 静态站点，不含 Next.js 源码）
 
 不需要安装任何依赖。不需要数据库。ProMentor 只是告诉 AI 怎么当一个好老师。
+
+### 同步到本机已安装副本（Codex）
+
+仓库 `skills/promentor/` 是唯一事实来源。修改后同步到 Codex 技能目录：
+
+```bash
+rsync -a --delete skills/promentor/ ~/.codex/skills/promentor/
+```
 
 ## 使用
 
@@ -95,15 +104,15 @@ AI 对比你的实现 vs 原始源码，解释设计决策、"为什么这样做
 **架构**
 
 - 全局单进程：重复启动复用已有进程，在另一个项目学习时自动切换
-- 网页只存在于技能包内，不复制到项目目录；服务启动时读取项目根目录的 `.promentor/` 数据
+- 网页只存在于技能包 `assets/dashboard/` 内，不复制到项目目录；服务启动时读取项目根目录的 `.promentor/` 数据
 
 使用方式：
 
 ```
 cd /path/to/project
-python3 <promentor-skill>/serve.py          # 启动并打开浏览器
-python3 <promentor-skill>/serve.py status   # 查看运行进程
-python3 <promentor-skill>/serve.py stop     # 停止
+python3 <promentor-skill>/scripts/serve.py          # 启动并打开浏览器
+python3 <promentor-skill>/scripts/serve.py status   # 查看运行进程
+python3 <promentor-skill>/scripts/serve.py stop     # 停止
 ```
 
 ## 命令速查

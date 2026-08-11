@@ -1,7 +1,6 @@
 ---
 name: promentor
-description: 把任意项目转成 MIT 风格的工程课程 在实践中学习
-argument-hint: "<init | learn | test | hint | submit | review | progress | dashboard>"
+description: 把任意项目转成 MIT 风格的动手工程课程：生成大纲、讲义、源码导读、Lab 与行为测试，讲解源码、判题并做 AI Review。当用户想基于当前项目逐章学习源码、手写核心逻辑，或运行 /promentor init|learn|test|hint|submit|review|progress|dashboard 时使用。
 ---
 
 # ProMentor
@@ -28,170 +27,31 @@ argument-hint: "<init | learn | test | hint | submit | review | progress | dashb
 
 所有课程数据以文件形式存储在项目根目录的 `.promentor/` 下。零数据库依赖，人类可读，Git 可 diff。
 
-### 1.1 目录结构
-
 ```
 .promentor/
 ├── course.json                  # 课程元信息
 ├── progress.json                # 学习进度
 ├── chapters/
-│   ├── ch01-<slug>/
-│   │   ├── lecture.md           # 讲义（Markdown）
-│   │   ├── source.md            # 源码阅读指南（标注关键行）
-│   │   ├── lab.json             # Lab 定义：接口签名、要求
-│   │   └── lab_test.<ext>       # 行为测试（学生不可改）
-│   └── ch02-<slug>/
+│   └── ch01-<slug>/
+│       ├── lecture.md           # 讲义（Markdown）
+│       ├── source.md            # 源码阅读指南（标注关键行）
+│       ├── lab.json             # Lab 定义：接口签名、要求
+│       └── lab_test.<ext>       # 行为测试（学生不可改）
 └── submissions/
     └── ch01-<slug>/
         ├── attempt_1.<ext>
         └── attempt_2.<ext>
 ```
 
-### 1.2 course.json
+| 文件 | 关键约定 |
+|------|---------|
+| `course.json` | 章节 id 格式 `ch<NN>-<slug>`；`difficulty` 为 easy/mid/hard；`source_files` 标注原始源码文件+行号 |
+| `progress.json` | `status` 为 not_started/in_progress/completed；`score` 0-100；`attempts` 为 submit 次数 |
+| `lab.json` | `interface.functions[].signature` 学生必须严格遵循；`test_command` 支持 `{chapter_dir}` 占位符 |
+| `lecture.md` | ≤300 行，先讲概念与设计决策，结尾衔接 Lab |
+| `source.md` | 关键文件+行号分段标注，解释"为什么" |
 
-```json
-{
-  "project": "gin",
-  "language": "go",
-  "generated_at": "2026-07-31T10:00:00Z",
-  "chapters": [
-    {
-      "id": "ch01-http-server",
-      "title": "HTTP Server 基础",
-      "difficulty": "mid",
-      "prerequisites": [],
-      "learning_goals": [
-        "理解 net/http Server 的生命周期",
-        "掌握 Handler 接口的设计意图"
-      ],
-      "source_files": ["gin.go:1-120"],
-      "lab_interface": {
-        "package": "httpserver",
-        "exports": ["NewServer", "Server.ServeHTTP"]
-      }
-    }
-  ]
-}
-```
-
-字段说明：
-- `id`: 格式 `ch<NN>-<slug>`，两位数序号 + 短横线 + 英文 slug
-- `difficulty`: `easy` | `mid` | `hard`
-- `prerequisites`: 前置 Chapter 的 id 列表
-- `source_files`: 原始项目中与该 Chapter 相关的源文件及行号
-- `lab_interface`: 学生需要实现的公开接口
-
-### 1.3 progress.json
-
-```json
-{
-  "project_name": "gin",
-  "current_chapter": "ch02-router",
-  "chapters": {
-    "ch01-http-server": {
-      "status": "completed",
-      "score": 95.0,
-      "attempts": 3,
-      "hint_level_reached": 1,
-      "completed_at": "2026-07-30T15:04:05Z"
-    },
-    "ch02-router": {
-      "status": "in_progress",
-      "score": 0,
-      "attempts": 5,
-      "hint_level_reached": 2
-    }
-  }
-}
-```
-
-- `status`: `not_started` | `in_progress` | `completed`
-- `score`: 0-100，submit 后才有分数
-- `attempts`: submit 次数
-- `hint_level_reached`: 学生在此 Chapter 中达到的最高提示层级
-
-### 1.4 lab.json
-
-```json
-{
-  "chapter_id": "ch02-router",
-  "title": "Router 设计",
-  "description": "实现一个支持路径参数和 HTTP 方法匹配的路由器",
-  "language": "go",
-  "package": "router",
-  "files": [
-    {
-      "path": "router.go",
-      "description": "路由器的核心实现"
-    }
-  ],
-  "interface": {
-    "types": [
-      {
-        "name": "Router",
-        "kind": "struct",
-        "doc": "HTTP 路由器，存储路由表并提供查找"
-      },
-      {
-        "name": "Handler",
-        "kind": "type",
-        "doc": "type Handler func(w http.ResponseWriter, req *http.Request)"
-      }
-    ],
-    "functions": [
-      {
-        "signature": "func NewRouter() *Router",
-        "doc": "创建一个新的 Router 实例"
-      },
-      {
-        "signature": "func (r *Router) AddRoute(method, path string, handler Handler)",
-        "doc": "注册一个路由规则。path 可包含 :param 参数段"
-      },
-      {
-        "signature": "func (r *Router) FindRoute(method, path string) (Handler, map[string]string)",
-        "doc": "查找匹配的路由。返回 handler 和路径参数。无匹配时 handler 为 nil"
-      }
-    ]
-  },
-  "test_command": "cd .promentor/chapters/ch02-router && go test -v -json ./..."
-}
-```
-
-- `interface.functions` 中的 `signature` 是学生必须严格遵循的函数签名
-- `test_command` 是运行测试的 shell 命令，`{chapter_dir}` 会被替换为实际的 chapter 目录
-
-### 1.5 lecture.md 规范
-
-讲义是 Markdown 文件。写作要求：
-
-1. **开门见山**：第一段说清楚"这个 Chapter 学什么、为什么重要"
-2. **核心概念拆解**：每个概念一小节，配代码片段说明
-3. **设计决策解释**：重点解释"为什么这样设计而不是那样"，对比替代方案
-4. **与 Lab 的衔接**：结尾指明"接下来你要实现什么，对应讲义中的哪些概念"
-5. **行数控制**：单 Chapter 讲义不超过 300 行，聚焦核心
-
-### 1.6 source.md 规范
-
-源码阅读指南，标注原始代码的关键行：
-
-```markdown
-# 源码导读：Router 设计
-
-## 核心文件：`gin.go:45-120`
-
-### 数据结构（:45-:60）
-[解释 Router 的核心数据结构，为什么选这个结构]
-
-### 路由注册（:62-:85）
-[解释 AddRoute 的注册逻辑]
-
-### 路由查找（:87-:120）
-[解释 FindRoute 的查找算法，标注关键行]
-```
-
-- 只标注和本 Chapter 概念相关的代码
-- 每段标注必须带行号
-- 解释"为什么"而不是"是什么"
+**完整字段规范（JSON 示例、逐字段说明）**：读写课程数据前阅读 `references/data-format.md`。
 
 ## 2. 命令实现
 
@@ -206,7 +66,7 @@ argument-hint: "<init | learn | test | hint | submit | review | progress | dashb
 3. 统计文件数、代码行数
 4. 告诉用户你识别到的项目信息，确认是否继续
 
-**第二步：四轮扫描**（详见第 4 节）
+**第二步：四轮扫描**（详见 `references/generation.md`）
 
 1. 结构探测：获取文件树，识别模块边界
 2. 核心类型识别：搜索 type/class/interface 声明，读取关键源码
@@ -240,10 +100,10 @@ Final: 组装 Mini Gin        [hard]  把所有组件拼成一个可用的框架
 
 用户确认大纲后，按顺序为每个 Chapter 生成：
 
-1. `lecture.md` —— 根据第 4.4 节的生成规范
+1. `lecture.md` —— 根据 `references/generation.md` 的生成规范
 2. `source.md` —— 标注关键源码行
 3. `lab.json` —— 定义接口签名
-4. `lab_test.<ext>` —— 行为测试（详见第 4.5 节）
+4. `lab_test.<ext>` —— 行为测试（详见 `references/generation.md`）
 
 生成完一个 Chapter 后，汇报进度（"Ch 1/5 已生成..."），继续下一个。
 
@@ -251,7 +111,7 @@ Final: 组装 Mini Gin        [hard]  把所有组件拼成一个可用的框架
 
 1. 写入 `course.json` 和 `progress.json`（所有 Chapter 状态为 `not_started`）
 2. 追加 `.promentor/` 到 `.gitignore`
-3. 自动启动仪表盘：在项目根目录执行 `python3 <promentor-skill>/serve.py`
+3. 自动启动仪表盘：在项目根目录执行 `python3 <promentor-skill>/scripts/serve.py`
 4. 从脚本输出提取访问 URL（如 `http://localhost:3000/dashboard/`），展示给用户——
    Agent 对话与浏览器网页均可查看课程
 5. 展示完成面板：
@@ -309,7 +169,7 @@ ProMentor: {项目名}  ({language})
 
 **第三步：自动启动仪表盘**
 
-1. 在项目根目录执行 `python3 <promentor-skill>/serve.py`（**全局单进程**：若当前项目已有服务，脚本输出"已在运行"并显示进程信息，不会重复启动；若服务运行在其他项目，脚本会自动切换为当前项目）
+1. 在项目根目录执行 `python3 <promentor-skill>/scripts/serve.py`（**全局单进程**：若当前项目已有服务，脚本输出"已在运行"并显示进程信息，不会重复启动；若服务运行在其他项目，脚本会自动切换为当前项目）
 2. 从脚本输出提取访问 URL，并附当前章节直达链接：`{URL}chapters/{chapter_id}/`
 3. 告知用户：Agent 对话与浏览器网页均可查看本课讲义与源码导读
 
@@ -522,15 +382,15 @@ ProMentor: Gin Internals
 
 **第二步：启动**
 
-在项目根目录执行技能包中的 `serve.py`：
+在项目根目录执行技能包中的 `scripts/serve.py`：
 
 ```
-python3 <promentor-skill>/serve.py
+python3 <promentor-skill>/scripts/serve.py
 ```
 
 脚本自动完成：
 1. 从 3000 起自动寻找最小可用端口（被占用则 3001、3002 …）
-2. 直接服务技能包内的 `dashboard/` 产物——**不向项目复制任何文件**，网页只存在于技能包内
+2. 直接服务技能包内的 `assets/dashboard/` 产物——**不向项目复制任何文件**，网页只存在于技能包内
 3. 网页运行时读取当前项目根目录的 `.promentor/` 数据
 4. 后台启动静态服务器并打开浏览器
 
@@ -554,7 +414,7 @@ ProMentor Dashboard: 运行中
 
 ```
 /promentor dashboard status
-→ python3 <promentor-skill>/serve.py status
+→ python3 <promentor-skill>/scripts/serve.py status
 ```
 
 **停止**
@@ -562,7 +422,7 @@ ProMentor Dashboard: 运行中
 `/promentor dashboard kill`、`stop`、`shutdown` 均可：
 
 ```
-python3 <promentor-skill>/serve.py stop
+python3 <promentor-skill>/scripts/serve.py stop
 ```
 
 停止后确认进程已退出并告知用户。
@@ -577,7 +437,7 @@ python3 <promentor-skill>/serve.py stop
 cd dashboard && node scripts/build.mjs [--base-path=/子路径]
 ```
 
-构建产物输出到技能包 `dashboard/`，只分发构建产物，不含源码。
+构建产物输出到技能包 `assets/dashboard/`，只分发构建产物，不含源码。
 
 ## 3. 教学策略
 
@@ -609,195 +469,15 @@ Review 的核心价值在于**对比**。学生看到了自己的实现能跑，
 
 ## 4. 代码扫描与课程生成
 
-### 4.1 四轮扫描法
+执行 `/promentor init` 前，先读 `references/generation.md`，它包含：
 
-**第一轮：结构探测**
+1. 四轮扫描法：结构探测 → 核心类型识别 → 调用链追踪 → 架构归纳
+2. 大项目裁剪（>200 文件）：拓扑聚焦、功能去重、P0/P1/P2 优先级
+3. 难度评级：easy / mid / hard 判定标准
+4. Chapter 生成规范：lecture.md / source.md / lab.json / lab_test.<ext>
+5. 测试生成规范：黑盒原则、Go/Python 示例、关键约束
 
-```
-目标：弄清项目规模、语言、模块边界
-
-操作：
-• 获取文件树（跳过 .gitignore、vendor、node_modules、test 目录）
-• 搜索 main 函数 / 入口文件
-• 搜索 package / namespace / module 声明
-• 统计文件数、代码行数
-
-产出：项目元信息（语言、规模、入口点、一级模块列表）
-```
-
-**第二轮：核心类型识别**
-
-```
-目标：找到项目的核心数据结构和抽象
-
-操作：
-• 搜索 type / class / interface 声明
-• 对关键类型，读取完整源码
-• 识别嵌入 / 继承 / 组合关系
-• 标记公开接口 vs 内部实现
-
-产出：核心类型清单 + 关系图
-```
-
-**第三轮：调用链追踪**
-
-```
-目标：理解请求/数据的完整生命周期
-
-操作：
-• 从入口点出发，读取关键函数体
-• 追踪调用关系（搜索函数名引用）
-• 识别调用链深度、关键分支
-• 标记扩展点（interface 实现、回调注册、插件机制）
-
-产出：核心流程的调用链 + 关键方法列表
-```
-
-**第四轮：架构归纳**
-
-```
-目标：识别设计模式，拟定教学路线
-
-操作：
-• 将前三轮发现归纳为架构层次
-• 识别设计模式（中间件链、路由树、上下文传递、工厂模式等）
-• 标记精妙设计决策（"为什么用 A 而不是 B"）
-• 拟定 Chapter 边界和教学顺序
-
-产出：课程大纲 + 每个 Chapter 的教学重点
-```
-
-### 4.2 大项目裁剪（>200 文件）
-
-当项目超过 200 文件时，应用聚焦策略：
-
-**拓扑排序**：从入口点 BFS 扩散
-- 前 3 层：核心 —— 完整阅读源码
-- 4-6 层：辅助 —— 读签名 + 注释
-- 7 层+：跳过（依赖库、工具函数）
-
-**功能去重**：
-- 多个 Controller 只有路由不同 → 选一个深入
-- 多个 middleware 只有逻辑不同 → 选一个深入
-- 其余给文件名 + 一句话描述
-
-**标记优先级**：
-- P0：入口文件、核心类型、入口方法体
-- P1：核心算法实现、关键调用链
-- P2：辅助工具、配置、常量
-- 排除：test、mock、vendor、generated
-
-### 4.3 难度评级
-
-| 难度 | 特征 |
-|------|------|
-| `easy` | 概念直白，代码短小（<100 行），标准惯用写法 |
-| `mid` | 涉及 1-2 个设计决策，代码量中等，需要一定前置知识 |
-| `hard` | 包含项目最精妙的设计，涉及不直观的架构决策，需要 2+ 前置概念 |
-
-一个 Chapter 标记为 `hard` 的条件：
-- 涉及一个并不直观的架构决策，需要解释"为什么 A 而不是 B"
-- 包含非平凡的数据结构选择
-- 理解这段代码需要 2 个以上前置概念
-- 这段代码如果写错了，整个系统会以隐蔽的方式崩溃
-
-### 4.4 Chapter 生成规范
-
-**lecture.md 生成**：
-
-输入：该 Chapter 相关的原始源码 + 课程大纲上下文
-
-要求：
-1. 开篇一句话概括这个 Chapter 学什么
-2. 解释它在整个系统中的位置
-3. 拆解核心概念，每概念一小节
-4. 每个概念配原始代码片段（标注关键行）
-5. 重点解释设计决策："为什么这样设计"
-6. 结尾说明 Lab 要实现什么
-
-**source.md 生成**：
-
-输入：该 Chapter 相关的原始源码文件
-
-要求：
-1. 列出关键文件和行号范围
-2. 每段标注解释"这段代码在做什么、为什么这样做"
-3. 标注关键数据结构定义、核心算法逻辑、精妙 trick
-4. 只标注和本 Chapter 概念相关的内容
-
-**lab.json 生成**：
-
-输入：原始源码中的核心接口
-
-要求：
-1. 定义学生需要实现的类型和函数签名
-2. 签名必须精确（参数名、类型、返回值）
-3. 包含 `test_command`，确保测试可运行
-
-**lab_test.<ext> 生成**：
-
-输入：原始源码的核心逻辑
-
-要求：
-1. 黑盒测试：不关心实现，只关心输入输出
-2. 用目标语言的原生测试框架
-3. 覆盖：正常路径、边界情况、错误处理
-4. 测试代码中 import 学生的包路径
-5. 测试文件放在 `.promentor/chapters/{chapter_id}/` 下
-6. 测试必须能独立编译和运行
-
-### 4.5 测试生成规范
-
-**黑盒原则**：不关心学生怎么实现，只关心输入输出是否正确。
-
-**Go 示例**：
-
-```go
-package router_test
-
-import (
-    "testing"
-    student "github.com/user/project/.promentor/chapters/ch02-router"
-)
-
-func TestStaticRoute(t *testing.T) {
-    r := student.NewRouter()
-    var called bool
-    r.AddRoute("GET", "/users", func(w http.ResponseWriter, req *http.Request) {
-        called = true
-        w.WriteHeader(200)
-    })
-    handler, _ := r.FindRoute("GET", "/users")
-    if handler == nil {
-        t.Fatal("GET /users: 未找到路由处理函数")
-    }
-}
-```
-
-**Python 示例**：
-
-```python
-import pytest
-import sys
-sys.path.insert(0, ".promentor/chapters/ch02-router")
-from router import Router
-
-def test_static_route():
-    r = Router()
-    called = False
-    def handler(request):
-        nonlocal called
-        called = True
-        return {"status": 200}
-    r.add_route("GET", "/users", handler)
-    h, params = r.find_route("GET", "/users")
-    assert h is not None, "GET /users: 未找到路由处理函数"
-```
-
-**关键约束**：
-- 测试文件和学生的实现放在不同包/模块，通过 import 引入
-- 测试覆盖：正常路径、参数路径、错误方法、边界输入、嵌套参数
-- 测试名称清晰描述测试场景
+init 主流程：扫描项目 → 展示大纲等用户确认 → 逐 Chapter 生成 → 写入 course.json / progress.json → 追加 .gitignore → 启动仪表盘。
 
 ## 5. 断点续传（init --resume）
 

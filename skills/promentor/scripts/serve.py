@@ -12,14 +12,14 @@
  零依赖：仅 Python 标准库。
 --------------------------------------------------------------------------
  用法（在项目根目录运行）:
-   python3 <promentor-skill>/serve.py                 # 启动
-   python3 <promentor-skill>/serve.py status          # 查看状态
-   python3 <promentor-skill>/serve.py stop            # 停止
-   python3 <promentor-skill>/serve.py kill            # 同 stop
-   python3 <promentor-skill>/serve.py shutdown        # 同 stop
-   python3 <promentor-skill>/serve.py start --port 4000
-   python3 <promentor-skill>/serve.py start --no-open # 启动但不打开浏览器
-   python3 <promentor-skill>/serve.py start --foreground
+   python3 <promentor-skill>/scripts/serve.py                 # 启动
+   python3 <promentor-skill>/scripts/serve.py status          # 查看状态
+   python3 <promentor-skill>/scripts/serve.py stop            # 停止
+   python3 <promentor-skill>/scripts/serve.py kill            # 同 stop
+   python3 <promentor-skill>/scripts/serve.py shutdown        # 同 stop
+   python3 <promentor-skill>/scripts/serve.py start --port 4000
+   python3 <promentor-skill>/scripts/serve.py start --no-open # 启动但不打开浏览器
+   python3 <promentor-skill>/scripts/serve.py start --foreground
 ==========================================================================
 """
 
@@ -153,8 +153,8 @@ def project_root() -> Path:
 
 
 def assets_dir() -> Path:
-    """构建产物：脚本同目录下的 dashboard/"""
-    assets = Path(__file__).resolve().parent / "dashboard"
+    """构建产物：技能包 assets/dashboard/"""
+    assets = Path(__file__).resolve().parent.parent / "assets" / "dashboard"
     if not assets.is_dir():
         print(f"错误：未找到构建产物（{assets}）")
         sys.exit(1)

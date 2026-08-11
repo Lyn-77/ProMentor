@@ -4,7 +4,7 @@
  * ProMentor Dashboard 构建脚本
  * --------------------------------------------------------------------------
  * 1. next build 静态导出（basePath 可配，默认 /dashboard）
- * 2. 产物复制到 skills/promentor/dashboard/ —— 只分发构建产物，不含源码
+ * 2. 产物复制到 skills/promentor/assets/dashboard/ —— 只分发构建产物，不含源码
  *
  * 用法:
  *   node scripts/build.mjs                      # basePath=/dashboard
@@ -20,7 +20,7 @@ import { fileURLToPath } from "node:url"
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const outDir = path.join(root, "out")
-const targetDir = path.resolve(root, "../skills/promentor/dashboard")
+const targetDir = path.resolve(root, "../skills/promentor/assets/dashboard")
 
 const basePathArg = process.argv.find((arg) => arg.startsWith("--base-path="))
 const basePath = basePathArg ? basePathArg.split("=")[1] : "/dashboard"

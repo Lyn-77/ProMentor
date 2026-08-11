@@ -1,0 +1,4 @@
+interface:
+  display_name: "ProMentor 工程课程导师"
+  short_description: "把任意项目变成 MIT 风格工程课程，含讲义、Lab、判题与 AI Review"
+  default_prompt: "Use $promentor to turn the current project into a hands-on MIT-style engineering course."
