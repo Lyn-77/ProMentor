@@ -8,7 +8,7 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 
 ## 安装
 
-### ① DSH Web GUI 内置 Dashboard（DSH 专用）
+### DSH Web GUI 内置 Dashboard（非DeepSeek Harness不需要看）
 
 > 只有 DSH 需要本小节：它的 Dashboard 是 **GUI 内置插件**（Codex / Claude Code
 > 等其他 Agent 的技能包自带静态网页，跳过本小节）。插件预构建产物随 Release 包
@@ -26,43 +26,13 @@ cd /path/to/ProMentor
 bash dsh-plugin/install.sh
 ```
 
-然后**重启 GUI**（Ctrl+C 后重新运行启动命令）并刷新浏览器。已初始化 `.promentor/`
-课程的会话，输入框上方会出现 **ProMentor** 按钮，点击即打开面板（跟随当前会话
-工作目录，无需任何本地服务）。
+- 卸载：`bash dsh-plugin/uninstall.sh`
 
-- 脚本幂等、可重复执行，自动完成插件安装与注册
-- 卸载：`bash dsh-plugin/uninstall.sh`；更新：重新获取/构建后重跑 install.sh
-- 常见问题：报错 `Cannot find package` → 重跑 install.sh；没有按钮 → 重启 GUI + 强刷 + 确认已 `/promentor init`；报错"没有找到配置文件" → 先成功启动过一次 `dsh web`
-
-**发版（维护者）**
-
-```bash
-make build && make release    # 产出 release/promentor.zip，上传到 GitHub Releases 即可
-```
-
-### ② 其他 Agent：从 Release 解压（推荐）
+### 从release下载zip
 
 1. 前往 [Releases](https://github.com/Lyn-77/ProMentor/releases) 下载最新 `promentor.zip`
-2. 解压后把 `promentor/` 放到 `.{YourAgent}/skills/promentor`
-   （DSH 用户：`promentor/dsh-plugin/` 即插件的完整目录，见上方 ①）
 
-### ③ 其他 Agent：从源码构建
-
-```bash
-cd dashboard
-pnpm install && pnpm build:dashboard
-```
-
-然后将 `skills/promentor/` 整个目录复制到 `.{YourAgent}/skills/promentor`
-（构建产物自动输出到 `skills/promentor/dashboard/`）。运行时仅需 Python 3 标准库。
-
-### ④ 同步到本机已安装副本（Codex）
-
-仓库 `skills/promentor/` 是唯一事实来源。修改后同步到 Codex 技能目录：
-
-```bash
-rsync -a --delete skills/promentor/ ~/.agents/skills/promentor/
-```
+2. 解压后把 `promentor/` 放到 `.{YourAgent}/skills/`
 
 ## 使用
 
