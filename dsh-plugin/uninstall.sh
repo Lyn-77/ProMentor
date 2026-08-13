@@ -10,7 +10,8 @@ set -euo pipefail
 DSH_HOME="${DSH_HOME:-$HOME/.dsh}"
 PROFILE_DIR="$DSH_HOME/profiles/web"
 PATCH_FILE="$PROFILE_DIR/cordis.patch.yml"
-NM_DIR="$DSH_HOME/profiles/node_modules/@deepseek-ai"
+# 注意：包名自带 @deepseek-ai/ scope，NM_DIR 必须是不带 scope 的裸 node_modules
+NM_DIR="$DSH_HOME/profiles/node_modules"
 
 HOST_NAME="@deepseek-ai/dsh-host-promentor"
 CLIENT_NAME="@deepseek-ai/dsh-client-ui-promentor"

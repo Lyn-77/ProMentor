@@ -39,14 +39,15 @@ echo "  DSH_HOME: $DSH_HOME"
 }
 
 # 1) 安装插件包。
-#    若是软链：说明该名字由 DSH 源码安装的内置依赖闭包管理（heal 每次启动
-#    重建，且要求该路径必须是软链），保持不动即可——它始终指向源码里的
-#    最新构建。
+#    若是【有效的】软链：说明该名字由 DSH 源码安装的内置依赖闭包管理（heal
+#    每次启动重建，且要求该路径必须是软链），保持不动即可——它始终指向源码
+#    里的最新构建。
+#    若是悬空软链（目标已不存在，如切换过 harness 分支）：不可用，按拷贝处理。
 #    否则（npm 安装的 DSH）：拷贝预构建产物为真实目录；DSH 启动时不会删除
 #    闭包之外的包，因此跨重启持久生效。
 mkdir -p "$NM_DIR"
 for name in "$HOST_NAME" "$CLIENT_NAME"; do
-  if [ -L "$NM_DIR/$name" ]; then
+  if [ -L "$NM_DIR/$name" ] && [ -e "$NM_DIR/$name" ]; then
     echo "  ✓ 已由 DSH 源码安装管理（软链，自动跟随源码构建）: $name"
   else
     rm -rf "$NM_DIR/$name"
