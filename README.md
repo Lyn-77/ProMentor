@@ -101,7 +101,11 @@ AI 对比你的实现 vs 原始源码，解释设计决策、"为什么这样做
 /promentor dashboard
 ```
 
-自动读取 `.promentor/` 下生成的课程数据，浏览器网页与 Agent 对话双通道查看。
+**DSH Web GUI 内置面板（推荐）**：点击会话输入框上方的 `ProMentor` 按钮，
+面板跟随当前会话的工作目录，直接读取 `.promentor/` 课程数据——无需任何本地服务。
+安装方式见 `plugin/README.md`（一条命令 `bash plugin/install.sh`）。
+
+**独立仪表盘（备用）**：自动读取 `.promentor/` 下生成的课程数据，浏览器网页与 Agent 对话双通道查看。
 
 **功能**
 
@@ -113,14 +117,18 @@ AI 对比你的实现 vs 原始源码，解释设计决策、"为什么这样做
 
 **自动启动**
 
-`/promentor init` 结束与 `/promentor learn <ch>` 开始时，会自动启动仪表盘并输出访问地址——Agent 对话与浏览器网页都能查看。
+`/promentor init` 结束与 `/promentor learn <ch>` 开始时，会提示打开 GUI 内置面板
+（插件未安装时自动启动独立仪表盘并输出访问地址）。
 
 **架构**
 
-- 全局单进程：重复启动复用已有进程，在另一个项目学习时自动切换
-- 网页只存在于技能包 `dashboard/` 内，不复制到项目目录；服务启动时读取项目根目录的 `.promentor/` 数据
+- DSH 插件模式：host 数据网关（`packages/host/promentor`）+ GUI 面板
+  （`packages/client/ui-promentor`），位于 deepseek-harness 仓库，本仓库 `plugin/`
+  目录负责注册（`install.sh` / `uninstall.sh`）
+- 独立服务模式（备用）：全局单进程，重复启动复用已有进程；网页只存在于技能包
+  `dashboard/` 内，不复制到项目目录；服务启动时读取项目根目录的 `.promentor/` 数据
 
-使用方式：
+使用方式（备用模式）：
 
 ```
 cd /path/to/project

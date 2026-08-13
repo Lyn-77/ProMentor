@@ -114,16 +114,17 @@ Final: 组装 Mini Gin        [hard]  把所有组件拼成一个可用的框架
 
 1. 写入 `course.json` 和 `progress.json`（所有 Chapter 状态为 `not_started`）
 2. 追加 `.promentor/` 到 `.gitignore`
-3. 自动启动仪表盘：在项目根目录执行 `python3 <promentor-skill>/scripts/serve.py`
-4. 从脚本输出提取访问 URL（如 `http://localhost:3000/dashboard/`），展示给用户——
-   Agent 对话与浏览器网页均可查看课程
-5. 展示完成面板：
+3. 提示网页面板：**DSH Web GUI 已内置 ProMentor Dashboard**——用户点击会话输入框上方的
+   `ProMentor` 按钮即可打开当前项目的课程面板（无需任何本地服务）。
+   若 GUI 中未出现按钮（插件未安装），引导用户运行 `plugin/install.sh` 或使用
+   备用方案 `python3 <promentor-skill>/scripts/serve.py` 启动独立仪表盘。
+4. 展示完成面板：
 ```
 🎓 课程已生成：{项目名} —— {N} 个 Chapter
 
 启动学习：/promentor learn ch01-<slug>
 查看进度：/promentor progress
-网页面板：{dashboard URL}
+网页面板：点击输入框上方 ProMentor 按钮（GUI 内置）
 ```
 
 ### 2.2 `/promentor`（课程面板）
@@ -170,11 +171,12 @@ ProMentor: {项目名}  ({language})
 1. 读取 `progress.json`
 2. 如果该 Chapter 有未完成的 prerequisites，警告用户但允许继续
 
-**第三步：自动启动仪表盘**
+**第三步：指引网页面板**
 
-1. 在项目根目录执行 `python3 <promentor-skill>/scripts/serve.py`（**全局单进程**：若当前项目已有服务，脚本输出"已在运行"并显示进程信息，不会重复启动；若服务运行在其他项目，脚本会自动切换为当前项目）
-2. 从脚本输出提取访问 URL，并附当前章节直达链接：`{URL}chapters/{chapter_id}/`
-3. 告知用户：Agent 对话与浏览器网页均可查看本课讲义与源码导读
+1. 告知用户：**DSH Web GUI 已内置 ProMentor Dashboard**——点击会话输入框上方的
+   `ProMentor` 按钮，面板自动跟随当前会话的工作目录，可查看本课讲义与源码导读。
+2. 若 GUI 中无按钮（插件未安装），引导运行 `plugin/install.sh`；
+   紧急备用方案仍可用 `python3 <promentor-skill>/scripts/serve.py` 启动独立仪表盘。
 
 **第四步：教学**
 
@@ -188,7 +190,7 @@ ProMentor: {项目名}  ({language})
 结尾：
 ```
 打开 .promentor/chapters/{chapter_id}/ 开始实现。
-网页讲义：{dashboard URL}chapters/{chapter_id}/
+网页讲义：点击输入框上方 ProMentor 按钮，在面板中打开本章。
 写完告诉我，我帮你跑测试。
 ```
 
@@ -383,9 +385,26 @@ ProMentor: Gin Internals
 1. 确认项目根目录存在 `.promentor/`
 2. 不存在则提示先运行 `/promentor init`
 
-**第二步：启动**
+**第二步：打开内置 Dashboard（首选，无本地服务）**
 
-在项目根目录执行技能包中的 `scripts/serve.py`：
+DSH Web GUI 已内置 ProMentor Dashboard 插件：
+
+1. 告知用户点击**会话输入框上方的 `ProMentor` 按钮**
+2. 面板跟随**当前会话的工作目录**，自动读取该项目的 `.promentor/`
+3. 面板内容：总体完成度、当前学习章节、每章状态/分数/尝试/内容完整性，
+   点击任意 Chapter 直接在面板内阅读 lecture.md 与 source.md（Markdown 渲染）
+4. 若 GUI 中没有按钮（插件未安装），引导用户运行：
+
+```
+bash <promentor-skill>/../plugin/install.sh     # 或仓库根 plugin/install.sh
+```
+
+安装后重启 GUI 并刷新页面即可。插件包位于 deepseek-harness 仓库
+（`packages/host/promentor` + `packages/client/ui-promentor`）。
+
+**第三步：备用方案（无 GUI 环境）**
+
+仅当 GUI 内置面板不可用时，才使用独立静态服务：
 
 ```
 python3 <promentor-skill>/scripts/serve.py
@@ -397,8 +416,6 @@ python3 <promentor-skill>/scripts/serve.py
 3. 网页运行时读取当前项目根目录的 `.promentor/` 数据
 4. 后台启动静态服务器并打开浏览器
 
-**第三步：展示**
-
 Agent 将脚本输出的进程信息完整展示给用户，并告知访问 URL：
 
 ```
@@ -407,11 +424,6 @@ ProMentor Dashboard: 运行中
   端口:  3000
   URL:   http://localhost:3000/dashboard/
 ```
-
-- 主页自动读取 `.promentor/`：总体完成度、当前学习章节、每章状态/分数/尝试/内容完整性
-- 点击任意 Chapter，在页面内直接阅览该章的 lecture.md 与 source.md（Streamdown 渲染）
-- 当前章节同步到 URL hash（#ch01-xxx），可刷新、可分享
-- 浏览器未自动打开时，Agent 手动执行 `open <url>`（macOS）/ `xdg-open <url>`（Linux）
 
 **查看状态**
 

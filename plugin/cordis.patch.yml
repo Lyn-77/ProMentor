@@ -1,0 +1,12 @@
+# ProMentor Dashboard 插件注册行（唯一事实来源）
+#
+# 由 plugin/install.sh 幂等写入 ~/.dsh/profiles/web/cordis.patch.yml。
+# 该文件被 dsh web 进程热监听：写入后刷新浏览器页面即可生效，无需重启 GUI。
+# 行 id 必须全局唯一（与 web-app bundle 层、其他用户行不冲突）。
+
+- insert:
+    - id: promentor
+      name: '@deepseek-ai/dsh-host-promentor'
+
+    - id: ui-promentor
+      name: '@deepseek-ai/dsh-client-ui-promentor'
