@@ -11,7 +11,7 @@
 |------|------|
 | `src/host-promentor/` | **插件源码**：host 数据网关（对应 deepseek-harness `packages/host/promentor`，入库） |
 | `src/client-ui-promentor/` | **插件源码**：面板 UI（对应 deepseek-harness `packages/client/ui-promentor`，入库） |
-| `dist/` | **预构建插件包**（安装用；**不入库**——发版时由 `pack-release.sh` 构建进 Release zip） |
+| `dist/` | **预构建插件包**（安装用；**不入库**——发版时由 `make release` 构建进 Release zip） |
 
 插件源码的权威位置是 deepseek-harness 仓库的分支
 `feat/promentor-dashboard-plugin`；`src/` 是与仓库同步的镜像（供查阅，

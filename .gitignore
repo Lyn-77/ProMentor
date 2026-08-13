@@ -16,6 +16,9 @@ __pycache__/
 .promentor
 promentor.zip
 
+# Release 打包输出（make release 生成，上传 GitHub Releases）
+release/
+
 # 技能包构建产物（不入库，由 Release 压缩包或源码构建分发）
 skills/promentor/dashboard/
 

@@ -404,7 +404,7 @@ bash promentor/dsh-plugin/install.sh    # 解压 Release 的 promentor.zip 后�
 （`packages/host/promentor` + `packages/client/ui-promentor`，分支
 `feat/promentor-dashboard-plugin`），并镜像在本仓库 `dsh-plugin/src/`；
 预构建产物 `dsh-plugin/dist/` 不入库，随 Release zip 分发（见仓库根
-`pack-release.sh`）。
+`Makefile`，`make release`）。
 
 **第三步：备用方案（无 GUI 环境）**
 

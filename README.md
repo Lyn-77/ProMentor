@@ -78,16 +78,20 @@ bash dsh-plugin/uninstall.sh      # 移除插件包与注册行，重启 GUI 后
 **发版（维护者，仓库不含任何构建产物）**
 
 ```bash
-bash pack-release.sh       # 构建 dashboard + DSH dist（缺失时自动构建），打出 skills/promentor.zip
+make build        # 或直接 make：构建一切（dashboard + DSH 插件 dist）
+make release      # 打 zip 到 release/promentor.zip（缺失的产物自动构建）
 ```
 
+- 发版流程：`make build && make release`，然后把 `release/promentor.zip`
+  上传到 GitHub Releases（可重命名为 `promentor-skill-<版本>.zip`）。
+- `release/` 目录不入库（.gitignore），是发版输出专用文件夹。
 - DSH 插件源码：deepseek-harness 仓库（`packages/host/promentor` +
   `packages/client/ui-promentor`，分支 `feat/promentor-dashboard-plugin`），
   并镜像在本仓库 `dsh-plugin/src/`（源码入库，构建产物不入库）。
-- `pack-release.sh` 会自动调用 `dsh-plugin/rebuild-dist.sh`（需要
-  `DSH_HARNESS` 指向 deepseek-harness）与 dashboard 构建（需要 Node/pnpm）。
-- 把生成的 `skills/promentor.zip` 上传到 GitHub Releases（可重命名为
-  `promentor-skill-<版本>.zip`）。
+- `make release` 底层调用 `pack-release.sh`：自动调用
+  `dsh-plugin/rebuild-dist.sh`（需要 `DSH_HARNESS` 指向 deepseek-harness）
+  与 dashboard 构建（需要 Node/pnpm）；产物已存在则跳过。
+- `make clean` 删除全部构建产物与 `release/` 输出。
 
 ### ② 其他 Agent：从 Release 解压（推荐）
 
