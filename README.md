@@ -72,6 +72,7 @@ bash dsh-plugin/uninstall.sh      # 移除插件包与注册行，重启 GUI 后
 |------|------|
 | 报错"没有找到 DSH 配置文件目录" | 先成功启动过一次 `dsh web` 再运行安装脚本 |
 | 报错"找不到预构建产物" | 你用的是源码方式但还没构建：见文末"发版"，或改下 Release zip |
+| 启动报错 `Cannot find package '@deepseek-ai/dsh-*-promentor'` | 注册行还在但插件包解析不到（如源码目录被移走/软链悬空）：重跑 `bash dsh-plugin/install.sh` 覆盖安装（会自动清除悬空软链），或先卸载再安装 |
 | 没有出现 ProMentor 按钮 | 确认已重启 GUI、浏览器强刷（Cmd/Ctrl+Shift+R）、当前会话工作区已 `/promentor init` |
 | 面板打不开 | 重新运行 `install.sh` 后重启 GUI；仍不行可查看 GUI 启动日志 |
 
