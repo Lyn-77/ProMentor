@@ -12,52 +12,59 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 
 > **为什么 DSH 要多装一步**：Codex / Claude Code 等其他 Agent 的 Dashboard 是技能包自带的
 > 静态网页（技能包解压即用）；而 **DSH（DeepSeek Harness）的 Dashboard 是集成进 Web GUI
-> 的插件**，需要单独安装注册一次。装好后点按钮即开，无需任何本地服务，体验反而更好。
+> 的插件**，需要安装注册一次。装好后点按钮即开，无需任何本地服务，体验反而更好。
+> 插件是**预构建产物**（`plugin/dist/`，随仓库分发），安装过程不需要 DSH 源码、
+> 不需要 Node/pnpm、不需要编译。
 
 **前置条件**
 
-- 已 clone 并运行过 DSH Web GUI（deepseek-harness 仓库，启动命令如 `pnpm dsh web`）
-- 已 clone 本仓库（ProMentor）
-- Node.js + pnpm（仅构建插件包时需要）
+- DSH Web GUI 已安装并能运行（无论 `npm i -g @deepseek-ai/dsh` 还是源码方式），
+  且**成功启动过至少一次**（用于生成配置文件）
+- 本仓库（或 Release 包）已解压，能看到 `plugin/` 目录
 
-**安装步骤**
+**安装（一条命令）**
 
 ```bash
-# 1. 把 deepseek-harness 切换到插件分支
-cd /path/to/deepseek-harness
-git checkout feat/promentor-dashboard-plugin
-
-# 2. 运行安装脚本（在 ProMentor 仓库根目录执行）
 cd /path/to/ProMentor
 bash plugin/install.sh
-# harness 不在默认位置 ~/CODE/project/deepseek-harness 时：
-# DSH_HARNESS=/path/to/deepseek-harness bash plugin/install.sh
-
-# 3. 重启 GUI：Ctrl+C 停掉 dsh web 进程，重新运行启动命令，再刷新浏览器页面
 ```
 
-脚本是幂等的（可重复执行），只做三件事：
+脚本是幂等的（可重复执行），只做两件事：
 
-1. **构建**两个插件包（`packages/host/promentor` 数据网关 + `packages/client/ui-promentor` 面板 UI，位于 deepseek-harness 仓库）
-2. **软链**进 `~/.dsh/profiles/node_modules/@deepseek-ai/`
-3. **注册行**写入 `~/.dsh/profiles/web/cordis.patch.yml`（下次启动自动加载）
+1. **安装插件包**：把 `plugin/dist/` 里的两个预构建包
+   （`@deepseek-ai/dsh-host-promentor` 数据网关 + `@deepseek-ai/dsh-client-ui-promentor`
+   面板 UI）拷贝进 `~/.dsh/profiles/node_modules/@deepseek-ai/`。DSH 启动时
+   会重建该目录的内置软链，但**不会删除外部加入的包**，因此跨重启持久生效。
+   （若你是从 DSH 源码运行且该包已由内置闭包管理为软链，脚本会识别并保持不动。）
+2. **写入注册行**：把两行插件注册幂等写入 `~/.dsh/profiles/web/cordis.patch.yml`
+   （自动处理模板 `[]` 合并，可自愈历史损坏文件）。
 
-**验证**：刷新后，会话输入框上方出现 **ProMentor** 按钮，点击打开 Dashboard——
-面板跟随当前会话的工作目录，直接读取 `.promentor/` 课程数据，无需任何本地服务。
+然后**重启 GUI**：Ctrl+C 停掉 `dsh web`，重新运行启动命令，刷新浏览器页面。
+
+**验证**：刷新后，在【已初始化 `.promentor/` 课程的会话】输入框上方会出现
+**ProMentor** 按钮（无课程的工作区不显示按钮），点击打开 Dashboard——面板跟随
+当前会话的工作目录，直接读取 `.promentor/` 课程数据，无需任何本地服务。
+
+**更新插件**：更新 ProMentor（git pull 或重新下载 Release 包）后，再次运行
+`bash plugin/install.sh` 覆盖安装，重启 GUI 即可。
 
 **卸载**：
 
 ```bash
-bash plugin/uninstall.sh      # 移除软链与注册行，重启 GUI 后插件不再加载
+bash plugin/uninstall.sh      # 移除插件包与注册行，重启 GUI 后插件不再加载
 ```
 
 **常见问题**
 
 | 现象 | 处理 |
 |------|------|
-| 没有出现 ProMentor 按钮 | 确认第 1、2 步完成、GUI 已重启、浏览器强刷（Cmd/Ctrl+Shift+R） |
-| 面板提示"还没有课程" | 当前会话工作目录下没有 `.promentor/`，先运行 `/promentor init` |
-| 面板打不开 | 确认 harness 分支是 `feat/promentor-dashboard-plugin`，重跑 `install.sh` 后重启 |
+| 报错"没有找到 DSH 配置文件目录" | 先成功启动过一次 `dsh web` 再运行安装脚本 |
+| 没有出现 ProMentor 按钮 | 确认已重启 GUI、浏览器强刷（Cmd/Ctrl+Shift+R）、当前会话工作区已 `/promentor init` |
+| 面板打不开 | 重新运行 `install.sh` 后重启 GUI；仍不行可查看 GUI 启动日志 |
+
+> 维护者提示：插件源码位于 deepseek-harness 仓库（`packages/host/promentor` +
+> `packages/client/ui-promentor`，分支 `feat/promentor-dashboard-plugin`）。
+> 改动后运行 `bash plugin/rebuild-dist.sh` 重新生成 `plugin/dist/` 再提交。
 
 ### ② 其他 Agent：从 Release 解压（推荐）
 

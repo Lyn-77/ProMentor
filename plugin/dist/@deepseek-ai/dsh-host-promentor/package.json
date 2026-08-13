@@ -1,0 +1,13 @@
+{
+  "name": "@deepseek-ai/dsh-host-promentor",
+  "description": "ProMentor course data gateway (DSH web plugin, prebuilt)",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": ["lib/index.js"],
+  "license": "MIT"
+}
