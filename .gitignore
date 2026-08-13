@@ -18,3 +18,8 @@ promentor.zip
 
 # 技能包构建产物（不入库，由 Release 压缩包或源码构建分发）
 skills/promentor/dashboard/
+
+# DSH 插件构建产物（不入库，发版时由 pack-release.sh 构建进 Release zip；
+# 或按 README 从源码构建；dsh-plugin/src 为源码镜像，入库）
+dsh-plugin/dist/
+dsh-plugin/src/**/lib/

@@ -13,18 +13,30 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 > **为什么 DSH 要多装一步**：Codex / Claude Code 等其他 Agent 的 Dashboard 是技能包自带的
 > 静态网页（技能包解压即用）；而 **DSH（DeepSeek Harness）的 Dashboard 是集成进 Web GUI
 > 的插件**，需要安装注册一次。装好后点按钮即开，无需任何本地服务，体验反而更好。
-> 插件是**预构建产物**（`dsh-plugin/dist/`，随仓库分发），安装过程不需要 DSH 源码、
-> 不需要 Node/pnpm、不需要编译。
+> 插件以**预构建产物**随 Release 压缩包分发（仓库本身不含构建产物，见文末"发版"）。
 
 **前置条件**
 
 - DSH Web GUI 已安装并能运行（无论 `npm i -g @deepseek-ai/dsh` 还是源码方式），
   且**成功启动过至少一次**（用于生成配置文件）
-- 本仓库（或 Release 包）已解压，能看到 `dsh-plugin/` 目录
+- 已获得 `dsh-plugin/` 目录（见下）
+
+**获取 dsh-plugin（二选一）**
+
+- **方式 A（推荐，免构建）**：从 [Releases](https://github.com/Lyn-77/ProMentor/releases)
+  下载 `promentor.zip`（内含预构建的 dashboard 与 `dsh-plugin/dist/`），解压后
+  得到 `promentor/` 目录。
+- **方式 B（源码）**：`git clone` 本仓库（仓库不含构建产物），按下方"发版"
+  章节构建 `dsh-plugin/dist/`，或直接构建后使用 `dsh-plugin/`。
 
 **安装（一条命令）**
 
 ```bash
+# 方式 A：在解压出的 promentor/ 目录内
+cd <解压目录>/promentor
+bash dsh-plugin/install.sh
+
+# 方式 B：在仓库根目录
 cd /path/to/ProMentor
 bash dsh-plugin/install.sh
 ```
@@ -45,7 +57,7 @@ bash dsh-plugin/install.sh
 **ProMentor** 按钮（无课程的工作区不显示按钮），点击打开 Dashboard——面板跟随
 当前会话的工作目录，直接读取 `.promentor/` 课程数据，无需任何本地服务。
 
-**更新插件**：更新 ProMentor（git pull 或重新下载 Release 包）后，再次运行
+**更新插件**：重新下载 Release 包（或重新构建后），再次运行
 `bash dsh-plugin/install.sh` 覆盖安装，重启 GUI 即可。
 
 **卸载**：
@@ -59,19 +71,29 @@ bash dsh-plugin/uninstall.sh      # 移除插件包与注册行，重启 GUI 后
 | 现象 | 处理 |
 |------|------|
 | 报错"没有找到 DSH 配置文件目录" | 先成功启动过一次 `dsh web` 再运行安装脚本 |
+| 报错"找不到预构建产物" | 你用的是源码方式但还没构建：见文末"发版"，或改下 Release zip |
 | 没有出现 ProMentor 按钮 | 确认已重启 GUI、浏览器强刷（Cmd/Ctrl+Shift+R）、当前会话工作区已 `/promentor init` |
 | 面板打不开 | 重新运行 `install.sh` 后重启 GUI；仍不行可查看 GUI 启动日志 |
 
-> 维护者提示：插件源码位于 deepseek-harness 仓库（`packages/host/promentor` +
-> `packages/client/ui-promentor`，分支 `feat/promentor-dashboard-plugin`），
-> 并同步镜像在本仓库 `dsh-plugin/src/`。改动后运行
-> `bash dsh-plugin/rebuild-dist.sh` 重新生成 `dsh-plugin/dist/`（并刷新
-> `src/` 镜像）再提交。
+**发版（维护者，仓库不含任何构建产物）**
+
+```bash
+bash pack-release.sh       # 构建 dashboard + DSH dist（缺失时自动构建），打出 skills/promentor.zip
+```
+
+- DSH 插件源码：deepseek-harness 仓库（`packages/host/promentor` +
+  `packages/client/ui-promentor`，分支 `feat/promentor-dashboard-plugin`），
+  并镜像在本仓库 `dsh-plugin/src/`（源码入库，构建产物不入库）。
+- `pack-release.sh` 会自动调用 `dsh-plugin/rebuild-dist.sh`（需要
+  `DSH_HARNESS` 指向 deepseek-harness）与 dashboard 构建（需要 Node/pnpm）。
+- 把生成的 `skills/promentor.zip` 上传到 GitHub Releases（可重命名为
+  `promentor-skill-<版本>.zip`）。
 
 ### ② 其他 Agent：从 Release 解压（推荐）
 
-1. 前往 [Releases](https://github.com/Lyn-77/ProMentor/releases) 下载最新 `promentor-skill-<版本>.zip`
+1. 前往 [Releases](https://github.com/Lyn-77/ProMentor/releases) 下载最新 `promentor.zip`（或 `promentor-skill-<版本>.zip`）
 2. 解压后把 `promentor/` 放到 `.{YourAgent}/skills/promentor`
+   （DSH 用户：`promentor/dsh-plugin/` 即插件的完整目录，见上方 ①）
 
 ### ③ 其他 Agent：从源码构建
 

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # ============================================================================
-# ProMentor Dashboard —— 重建 dsh-plugin/dist 预构建产物（维护者专用）
+# ProMentor Dashboard —— 构建 dsh-plugin/dist 预构建产物（维护者专用）
 #
-# 普通用户不需要本脚本：dsh-plugin/dist 已提交进仓库，install.sh 直接使用。
+# dist 不入库（.gitignore 排除）：发版时由仓库根目录的 pack-release.sh 自动
+# 调用本脚本构建并打进 Release zip；本地想直接装源码版也可以手动运行。
 # 只有当插件源码（deepseek-harness 仓库 packages/host/promentor 与
-# packages/client/ui-promentor）有改动、需要重新发布时，才运行本脚本。
+# packages/client/ui-promentor）有改动、需要重新构建时，才运行本脚本。
 #
 # 用法：
 #   DSH_HARNESS=/path/to/deepseek-harness bash dsh-plugin/rebuild-dist.sh
@@ -99,7 +100,7 @@ cat > "$DIST/$CLIENT_NAME/package.json" <<EOF
 EOF
 
 echo
-echo "✅ 已重建（dist + src 源码镜像）："
+echo "✅ 已构建（dist + src 源码同步）："
 du -sh "$DIST/$HOST_NAME" "$DIST/$CLIENT_NAME" "$DIST/../src"
 echo
-echo "把 dsh-plugin/dist 与 dsh-plugin/src 提交进仓库后，用户即可用 dsh-plugin/install.sh 一键安装（无需 harness 源码）。"
+echo "dist 不入库：发版时运行仓库根 pack-release.sh 会自动调用本脚本，并把 dist 打进 Release zip。"

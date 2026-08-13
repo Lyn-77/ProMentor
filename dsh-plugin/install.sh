@@ -3,7 +3,7 @@
 # ProMentor Dashboard —— DSH Web GUI 插件一键安装（幂等，可重复执行）
 #
 # 不需要 deepseek-harness 源码、不需要 Node/pnpm、不需要编译：
-# 预构建产物随仓库分发在 dsh-plugin/dist/，本脚本只做两件事：
+# 预构建产物在 dsh-plugin/dist/（不入库，随 Release zip 分发或本地构建），本脚本只做两件事：
 #   1. 把两个插件包拷贝进 ~/.dsh/profiles/node_modules/@deepseek-ai/
 #      （DSH 启动时会自动重建该目录里的内置软链，但不会删除外部加入的
 #        包，所以拷贝会跨重启持久生效）

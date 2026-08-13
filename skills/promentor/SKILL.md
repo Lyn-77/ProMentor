@@ -396,11 +396,15 @@ DSH Web GUI 已内置 ProMentor Dashboard 插件：
 4. 若 GUI 中没有按钮（插件未安装），引导用户运行：
 
 ```
-bash <promentor-skill>/../dsh-plugin/install.sh    # 仓库根目录：bash dsh-plugin/install.sh
+bash promentor/dsh-plugin/install.sh    # 解压 Release 的 promentor.zip 后（内含预构建产物）
+# 或仓库根目录（需先按 README 构建产物）：bash dsh-plugin/install.sh
 ```
 
-安装后重启 GUI 并刷新页面即可。插件包位于 deepseek-harness 仓库
-（`packages/host/promentor` + `packages/client/ui-promentor`）。
+安装后重启 GUI 并刷新页面即可。插件源码位于 deepseek-harness 仓库
+（`packages/host/promentor` + `packages/client/ui-promentor`，分支
+`feat/promentor-dashboard-plugin`），并镜像在本仓库 `dsh-plugin/src/`；
+预构建产物 `dsh-plugin/dist/` 不入库，随 Release zip 分发（见仓库根
+`pack-release.sh`）。
 
 **第三步：备用方案（无 GUI 环境）**
 

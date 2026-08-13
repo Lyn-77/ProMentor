@@ -5,17 +5,19 @@
 > 自带的静态网页（`skills/promentor/dashboard/` + `scripts/serve.py`）。
 
 本目录把 ProMentor Dashboard 从"本地挂 Python 静态服务"（`scripts/serve.py`）
-升级为 **DSH Web GUI 内置插件**，包含三部分：
+升级为 **DSH Web GUI 内置插件**，包含两部分：
 
 | 路径 | 内容 |
 |------|------|
-| `dist/@deepseek-ai/dsh-*-promentor/` | **预构建插件包**（安装用，随仓库提交） |
-| `src/host-promentor/` | **插件源码镜像**：host 数据网关（对应 deepseek-harness `packages/host/promentor`） |
-| `src/client-ui-promentor/` | **插件源码镜像**：面板 UI（对应 deepseek-harness `packages/client/ui-promentor`） |
+| `src/host-promentor/` | **插件源码**：host 数据网关（对应 deepseek-harness `packages/host/promentor`，入库） |
+| `src/client-ui-promentor/` | **插件源码**：面板 UI（对应 deepseek-harness `packages/client/ui-promentor`，入库） |
+| `dist/` | **预构建插件包**（安装用；**不入库**——发版时由 `pack-release.sh` 构建进 Release zip） |
 
 插件源码的权威位置是 deepseek-harness 仓库的分支
-`feat/promentor-dashboard-plugin`；`src/` 是与 `dist/` 一起提交的同步镜像
-（供查阅，构建仍需 harness 工作区，见 `rebuild-dist.sh`）。
+`feat/promentor-dashboard-plugin`；`src/` 是与仓库同步的镜像（供查阅，
+构建仍需 harness 工作区，见 `rebuild-dist.sh`）。`dist/` 不提交 git：
+要么从 Release 的 `promentor.zip` 获取（推荐），要么本地运行
+`bash dsh-plugin/rebuild-dist.sh` 生成。
 
 ## 界面
 
@@ -56,12 +58,12 @@ bash dsh-plugin/uninstall.sh      # 移除插件包与注册行（恢复模板 [
 
 | 文件 | 作用 |
 |------|------|
-| `dist/@deepseek-ai/dsh-*-promentor/` | 预构建插件包（随仓库提交；更新请运行 `rebuild-dist.sh`） |
-| `src/` | 插件源码镜像（host + client，随仓库提交） |
+| `src/` | 插件源码（host + client，入库） |
+| `dist/` | 预构建插件包（不入库；Release zip 内自带，或本地 `rebuild-dist.sh` 生成） |
 | `cordis.patch.yml` | 注册行的唯一事实来源（install.sh 剥离注释后取用） |
 | `install.sh` | 一键安装：拷贝预构建包 + 幂等合并注册行 |
 | `uninstall.sh` | 逆操作 |
-| `rebuild-dist.sh` | 维护者专用：从 deepseek-harness 插件源码重新构建 `dist/` 并同步 `src/` |
+| `rebuild-dist.sh` | 维护者专用：从 deepseek-harness 插件源码构建 `dist/` 并同步 `src/` |
 
 ## 原理
 
