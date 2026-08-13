@@ -13,25 +13,25 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 > **为什么 DSH 要多装一步**：Codex / Claude Code 等其他 Agent 的 Dashboard 是技能包自带的
 > 静态网页（技能包解压即用）；而 **DSH（DeepSeek Harness）的 Dashboard 是集成进 Web GUI
 > 的插件**，需要安装注册一次。装好后点按钮即开，无需任何本地服务，体验反而更好。
-> 插件是**预构建产物**（`plugin/dist/`，随仓库分发），安装过程不需要 DSH 源码、
+> 插件是**预构建产物**（`dsh-plugin/dist/`，随仓库分发），安装过程不需要 DSH 源码、
 > 不需要 Node/pnpm、不需要编译。
 
 **前置条件**
 
 - DSH Web GUI 已安装并能运行（无论 `npm i -g @deepseek-ai/dsh` 还是源码方式），
   且**成功启动过至少一次**（用于生成配置文件）
-- 本仓库（或 Release 包）已解压，能看到 `plugin/` 目录
+- 本仓库（或 Release 包）已解压，能看到 `dsh-plugin/` 目录
 
 **安装（一条命令）**
 
 ```bash
 cd /path/to/ProMentor
-bash plugin/install.sh
+bash dsh-plugin/install.sh
 ```
 
 脚本是幂等的（可重复执行），只做两件事：
 
-1. **安装插件包**：把 `plugin/dist/` 里的两个预构建包
+1. **安装插件包**：把 `dsh-plugin/dist/` 里的两个预构建包
    （`@deepseek-ai/dsh-host-promentor` 数据网关 + `@deepseek-ai/dsh-client-ui-promentor`
    面板 UI）拷贝进 `~/.dsh/profiles/node_modules/@deepseek-ai/`。DSH 启动时
    会重建该目录的内置软链，但**不会删除外部加入的包**，因此跨重启持久生效。
@@ -46,12 +46,12 @@ bash plugin/install.sh
 当前会话的工作目录，直接读取 `.promentor/` 课程数据，无需任何本地服务。
 
 **更新插件**：更新 ProMentor（git pull 或重新下载 Release 包）后，再次运行
-`bash plugin/install.sh` 覆盖安装，重启 GUI 即可。
+`bash dsh-plugin/install.sh` 覆盖安装，重启 GUI 即可。
 
 **卸载**：
 
 ```bash
-bash plugin/uninstall.sh      # 移除插件包与注册行，重启 GUI 后插件不再加载
+bash dsh-plugin/uninstall.sh      # 移除插件包与注册行，重启 GUI 后插件不再加载
 ```
 
 **常见问题**
@@ -63,8 +63,10 @@ bash plugin/uninstall.sh      # 移除插件包与注册行，重启 GUI 后插�
 | 面板打不开 | 重新运行 `install.sh` 后重启 GUI；仍不行可查看 GUI 启动日志 |
 
 > 维护者提示：插件源码位于 deepseek-harness 仓库（`packages/host/promentor` +
-> `packages/client/ui-promentor`，分支 `feat/promentor-dashboard-plugin`）。
-> 改动后运行 `bash plugin/rebuild-dist.sh` 重新生成 `plugin/dist/` 再提交。
+> `packages/client/ui-promentor`，分支 `feat/promentor-dashboard-plugin`），
+> 并同步镜像在本仓库 `dsh-plugin/src/`。改动后运行
+> `bash dsh-plugin/rebuild-dist.sh` 重新生成 `dsh-plugin/dist/`（并刷新
+> `src/` 镜像）再提交。
 
 ### ② 其他 Agent：从 Release 解压（推荐）
 
@@ -161,7 +163,7 @@ AI 对比你的实现 vs 原始源码，解释设计决策、"为什么这样做
 
 **DSH Web GUI 内置面板（推荐）**：点击会话输入框上方的 `ProMentor` 按钮，
 面板跟随当前会话的工作目录，直接读取 `.promentor/` 课程数据——无需任何本地服务。
-安装教程见上方 **① DSH Web GUI 内置 Dashboard**（一条命令 `bash plugin/install.sh`）。
+安装教程见上方 **① DSH Web GUI 内置 Dashboard**（一条命令 `bash dsh-plugin/install.sh`）。
 
 **独立仪表盘（备用，供 Codex / Claude Code 等）**：自动读取 `.promentor/` 下生成的课程数据，浏览器网页与 Agent 对话双通道查看。
 
@@ -181,7 +183,7 @@ AI 对比你的实现 vs 原始源码，解释设计决策、"为什么这样做
 **架构**
 
 - DSH 插件模式：host 数据网关（`packages/host/promentor`）+ GUI 面板
-  （`packages/client/ui-promentor`），位于 deepseek-harness 仓库，本仓库 `plugin/`
+  （`packages/client/ui-promentor`），位于 deepseek-harness 仓库，本仓库 `dsh-plugin/`
   目录负责注册（`install.sh` / `uninstall.sh`）
 - 独立服务模式（备用）：全局单进程，重复启动复用已有进程；网页只存在于技能包
   `dashboard/` 内，不复制到项目目录；服务启动时读取项目根目录的 `.promentor/` 数据

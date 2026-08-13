@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # ============================================================================
-# ProMentor Dashboard —— 重建 plugin/dist 预构建产物（维护者专用）
+# ProMentor Dashboard —— 重建 dsh-plugin/dist 预构建产物（维护者专用）
 #
-# 普通用户不需要本脚本：plugin/dist 已提交进仓库，install.sh 直接使用。
+# 普通用户不需要本脚本：dsh-plugin/dist 已提交进仓库，install.sh 直接使用。
 # 只有当插件源码（deepseek-harness 仓库 packages/host/promentor 与
 # packages/client/ui-promentor）有改动、需要重新发布时，才运行本脚本。
 #
 # 用法：
-#   DSH_HARNESS=/path/to/deepseek-harness bash plugin/rebuild-dist.sh
-#   bash plugin/rebuild-dist.sh          # 默认 ~/CODE/project/deepseek-harness
+#   DSH_HARNESS=/path/to/deepseek-harness bash dsh-plugin/rebuild-dist.sh
+#   bash dsh-plugin/rebuild-dist.sh          # 默认 ~/CODE/project/deepseek-harness
 # ============================================================================
 set -euo pipefail
 
@@ -44,6 +44,15 @@ cp "$HARNESS/$CLIENT_PKG/lib/client.js" "$DIST/$CLIENT_NAME/lib/client.js"
 if [ -f "$HARNESS/$CLIENT_PKG/lib/client.js.map" ]; then
   cp "$HARNESS/$CLIENT_PKG/lib/client.js.map" "$DIST/$CLIENT_NAME/lib/client.js.map"
 fi
+
+# 3) 同步插件源码镜像到 src/（与 dist 一起提交，供查阅；构建仍需 harness 工作区）
+mkdir -p "$DIST/../src"
+rsync -a --delete \
+  --exclude lib --exclude node_modules --exclude '*.tsbuildinfo' \
+  "$HARNESS/$HOST_PKG/" "$DIST/../src/host-promentor/"
+rsync -a --delete \
+  --exclude lib --exclude node_modules --exclude '*.tsbuildinfo' \
+  "$HARNESS/$CLIENT_PKG/" "$DIST/../src/client-ui-promentor/"
 
 cat > "$DIST/$HOST_NAME/package.json" <<EOF
 {
@@ -90,7 +99,7 @@ cat > "$DIST/$CLIENT_NAME/package.json" <<EOF
 EOF
 
 echo
-echo "✅ 已重建："
-du -sh "$DIST/$HOST_NAME" "$DIST/$CLIENT_NAME"
+echo "✅ 已重建（dist + src 源码镜像）："
+du -sh "$DIST/$HOST_NAME" "$DIST/$CLIENT_NAME" "$DIST/../src"
 echo
-echo "把 plugin/dist 提交进仓库后，用户即可用 plugin/install.sh 一键安装（无需 harness 源码）。"
+echo "把 dsh-plugin/dist 与 dsh-plugin/src 提交进仓库后，用户即可用 dsh-plugin/install.sh 一键安装（无需 harness 源码）。"

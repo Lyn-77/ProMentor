@@ -1,0 +1,48 @@
+/* Composer-dock trigger for the ProMentor dashboard. A compact content-sized
+   card (icon + label), centered above the input card; the whole card is one
+   clickable button. */
+
+.card,
+.cardActive {
+  box-sizing: border-box;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto;
+  width: fit-content;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 12px;
+  background: var(--dsw-specific-tip);
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  text-align: left;
+  color: var(--dsw-alias-label-primary);
+  cursor: pointer;
+}
+
+.card:hover {
+  border-color: var(--dsw-alias-border-l2);
+}
+
+.cardActive {
+  border-color: var(--dsw-alias-brand-primary);
+  background: var(--dsw-alias-button-primary-dimmed);
+}
+
+.lead {
+  display: inline-flex;
+  flex: none;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.cardActive .lead {
+  color: var(--dsw-alias-brand-primary);
+}
+
+.label {
+  flex: none;
+  font-weight: 500;
+}

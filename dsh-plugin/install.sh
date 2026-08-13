@@ -3,15 +3,15 @@
 # ProMentor Dashboard —— DSH Web GUI 插件一键安装（幂等，可重复执行）
 #
 # 不需要 deepseek-harness 源码、不需要 Node/pnpm、不需要编译：
-# 预构建产物随仓库分发在 plugin/dist/，本脚本只做两件事：
+# 预构建产物随仓库分发在 dsh-plugin/dist/，本脚本只做两件事：
 #   1. 把两个插件包拷贝进 ~/.dsh/profiles/node_modules/@deepseek-ai/
 #      （DSH 启动时会自动重建该目录里的内置软链，但不会删除外部加入的
 #        包，所以拷贝会跨重启持久生效）
 #   2. 把注册行幂等写入 ~/.dsh/profiles/web/cordis.patch.yml
 #
 # 用法：
-#   bash plugin/install.sh
-#   DSH_HOME=/path/to/.dsh bash plugin/install.sh   # 自定义 DSH_HOME
+#   bash dsh-plugin/install.sh
+#   DSH_HOME=/path/to/.dsh bash dsh-plugin/install.sh   # 自定义 DSH_HOME
 # ============================================================================
 set -euo pipefail
 
@@ -34,7 +34,7 @@ echo "  DSH_HOME: $DSH_HOME"
 }
 [ -d "$DIST_DIR/$HOST_NAME" ] && [ -d "$DIST_DIR/$CLIENT_NAME" ] || {
   echo "错误：找不到预构建产物 $DIST_DIR/{$HOST_NAME,$CLIENT_NAME}"
-  echo "请确认本脚本位于 ProMentor 仓库的 plugin/ 目录内（或 release 包完整解压）。"
+  echo "请确认本脚本位于 ProMentor 仓库的 dsh-plugin/ 目录内（或 release 包完整解压）。"
   exit 1
 }
 
@@ -60,7 +60,7 @@ done
 #    导致解析失败；因此：有 `[]` 就替换它，没有就追加到列表末尾。
 ROWS_SOURCE="$DIST_DIR/../cordis.patch.yml"
 ROWS_FILE="$(mktemp)"
-printf '%s\n' '# ProMentor Dashboard 插件（plugin/install.sh 安装）' > "$ROWS_FILE"
+printf '%s\n' '# ProMentor Dashboard 插件（dsh-plugin/install.sh 安装）' > "$ROWS_FILE"
 grep -v '^[[:space:]]*#' "$ROWS_SOURCE" | sed '/^[[:space:]]*$/d' >> "$ROWS_FILE"
 
 mkdir -p "$PROFILE_DIR"
@@ -94,4 +94,4 @@ echo "   - 若 GUI 正在运行：重启它（Ctrl+C 后重新运行启动命令
 echo "   - 刷新后，在【已初始化 .promentor/ 课程的会话】输入框上方会出现 ProMentor 按钮。"
 echo "   - 更新插件：重新下载/更新 ProMentor 后，再次运行本脚本即可覆盖安装。"
 echo
-echo "卸载：bash plugin/uninstall.sh"
+echo "卸载：bash dsh-plugin/uninstall.sh"

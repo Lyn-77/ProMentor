@@ -1,17 +1,21 @@
-# ProMentor Dashboard —— DSH Web GUI 插件注册层
+# dsh-plugin —— DSH（DeepSeek Harness）专用目录
+
+> **⚠️ 本目录只对 DSH（DeepSeek Harness）用户有用。**
+> Codex / Claude Code 等其他 Agent 完全不需要它——它们的 Dashboard 是技能包
+> 自带的静态网页（`skills/promentor/dashboard/` + `scripts/serve.py`）。
 
 本目录把 ProMentor Dashboard 从"本地挂 Python 静态服务"（`scripts/serve.py`）
-升级为 **DSH Web GUI 内置插件**：
+升级为 **DSH Web GUI 内置插件**，包含三部分：
 
-- 插件代码（host 数据服务 + client 面板 UI）位于 deepseek-harness 仓库：
-  - `packages/host/promentor`（`@deepseek-ai/dsh-host-promentor`）
-  - `packages/client/ui-promentor`（`@deepseek-ai/dsh-client-ui-promentor`）
-- `dist/` 是**预构建产物**（随仓库提交），普通用户安装**不需要 DSH 源码、
-  不需要 Node/pnpm、不需要编译**。
-- 本目录只负责**注册**：`install.sh` 把两个预构建包拷贝进
-  `~/.dsh/profiles/node_modules/@deepseek-ai/`，并把注册行幂等写入
-  `~/.dsh/profiles/web/cordis.patch.yml`（**注意**：写入后需重启 GUI——
-  Ctrl+C 停掉 `dsh web` 后重新启动——再刷新浏览器才能生效）。
+| 路径 | 内容 |
+|------|------|
+| `dist/@deepseek-ai/dsh-*-promentor/` | **预构建插件包**（安装用，随仓库提交） |
+| `src/host-promentor/` | **插件源码镜像**：host 数据网关（对应 deepseek-harness `packages/host/promentor`） |
+| `src/client-ui-promentor/` | **插件源码镜像**：面板 UI（对应 deepseek-harness `packages/client/ui-promentor`） |
+
+插件源码的权威位置是 deepseek-harness 仓库的分支
+`feat/promentor-dashboard-plugin`；`src/` 是与 `dist/` 一起提交的同步镜像
+（供查阅，构建仍需 harness 工作区，见 `rebuild-dist.sh`）。
 
 ## 界面
 
@@ -25,10 +29,10 @@
 ## 安装（一条命令）
 
 ```sh
-bash plugin/install.sh
+bash dsh-plugin/install.sh
 ```
 
-脚本幂等、可重复执行；支持 `DSH_HOME=/path/to/.dsh bash plugin/install.sh`
+脚本幂等、可重复执行；支持 `DSH_HOME=/path/to/.dsh bash dsh-plugin/install.sh`
 自定义 DSH 配置目录。完成后**重启 GUI**（Ctrl+C 后重新运行启动命令）并刷新
 `http://127.0.0.1:3080` 页面，即可看到 dock 按钮。
 
@@ -45,7 +49,7 @@ bash plugin/install.sh
 ## 卸载
 
 ```sh
-bash plugin/uninstall.sh      # 移除插件包与注册行（恢复模板 []），重启 GUI 后不再加载
+bash dsh-plugin/uninstall.sh      # 移除插件包与注册行（恢复模板 []），重启 GUI 后不再加载
 ```
 
 ## 文件
@@ -53,10 +57,11 @@ bash plugin/uninstall.sh      # 移除插件包与注册行（恢复模板 []）
 | 文件 | 作用 |
 |------|------|
 | `dist/@deepseek-ai/dsh-*-promentor/` | 预构建插件包（随仓库提交；更新请运行 `rebuild-dist.sh`） |
+| `src/` | 插件源码镜像（host + client，随仓库提交） |
 | `cordis.patch.yml` | 注册行的唯一事实来源（install.sh 剥离注释后取用） |
 | `install.sh` | 一键安装：拷贝预构建包 + 幂等合并注册行 |
 | `uninstall.sh` | 逆操作 |
-| `rebuild-dist.sh` | 维护者专用：从 deepseek-harness 插件源码重新构建 `dist/` |
+| `rebuild-dist.sh` | 维护者专用：从 deepseek-harness 插件源码重新构建 `dist/` 并同步 `src/` |
 
 ## 原理
 

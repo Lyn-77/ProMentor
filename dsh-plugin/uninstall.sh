@@ -3,7 +3,7 @@
 # ProMentor Dashboard —— DSH Web GUI 插件卸载脚本（幂等）
 #
 # 移除：profiles/node_modules 软链 + cordis.patch.yml 注册行。
-# 用法：bash plugin/uninstall.sh
+# 用法：bash dsh-plugin/uninstall.sh
 # ============================================================================
 set -euo pipefail
 

@@ -116,7 +116,7 @@ Final: 组装 Mini Gin        [hard]  把所有组件拼成一个可用的框架
 2. 追加 `.promentor/` 到 `.gitignore`
 3. 提示网页面板：**DSH Web GUI 已内置 ProMentor Dashboard**——用户点击会话输入框上方的
    `ProMentor` 按钮即可打开当前项目的课程面板（无需任何本地服务）。
-   若 GUI 中未出现按钮（插件未安装），引导用户运行 `plugin/install.sh` 或使用
+   若 GUI 中未出现按钮（插件未安装），引导用户运行 `dsh-plugin/install.sh` 或使用
    备用方案 `python3 <promentor-skill>/scripts/serve.py` 启动独立仪表盘。
 4. 展示完成面板：
 ```
@@ -175,7 +175,7 @@ ProMentor: {项目名}  ({language})
 
 1. 告知用户：**DSH Web GUI 已内置 ProMentor Dashboard**——点击会话输入框上方的
    `ProMentor` 按钮，面板自动跟随当前会话的工作目录，可查看本课讲义与源码导读。
-2. 若 GUI 中无按钮（插件未安装），引导运行 `plugin/install.sh`；
+2. 若 GUI 中无按钮（插件未安装），引导运行 `dsh-plugin/install.sh`；
    紧急备用方案仍可用 `python3 <promentor-skill>/scripts/serve.py` 启动独立仪表盘。
 
 **第四步：教学**
@@ -396,7 +396,7 @@ DSH Web GUI 已内置 ProMentor Dashboard 插件：
 4. 若 GUI 中没有按钮（插件未安装），引导用户运行：
 
 ```
-bash <promentor-skill>/../plugin/install.sh     # 或仓库根 plugin/install.sh
+bash <promentor-skill>/../dsh-plugin/install.sh    # 仓库根目录：bash dsh-plugin/install.sh
 ```
 
 安装后重启 GUI 并刷新页面即可。插件包位于 deepseek-harness 仓库

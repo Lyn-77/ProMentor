@@ -1,0 +1,399 @@
+/* ProMentor dashboard panel. Colors strictly follow the original dashboard's
+   Tailwind (shadcn zinc) palette, with explicit light/dark variants switched
+   by the GUI's dark-theme attribute (`body[data-ds-dark-theme]`), so contrast
+   holds in both themes instead of depending on DSW alias tokens. */
+
+/* ---- Palette: light (default) ---- */
+.overlay {
+  --pm-bg: #ffffff;
+  --pm-fg: #09090b;
+  --pm-muted: #f4f4f5;
+  --pm-muted-fg: #71717a;
+  --pm-border: #e4e4e7;
+  --pm-primary: #09090b;
+  --pm-success: #059669;
+  --pm-success-bg: #d1fae5;
+  --pm-success-fg: #065f46;
+  --pm-warning: #d97706;
+  --pm-warning-bg: #fef3c7;
+  --pm-warning-fg: #92400e;
+  --pm-danger: #dc2626;
+  --pm-danger-bg: #fee2e2;
+  --pm-danger-fg: #991b1b;
+  --pm-danger-border: rgb(220 38 38 / 0.4);
+
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dsw-alias-bg-mask-2);
+  pointer-events: auto;
+}
+
+/* ---- Palette: dark ---- */
+body[data-ds-dark-theme] .overlay {
+  --pm-bg: #09090b;
+  --pm-fg: #fafafa;
+  --pm-muted: #27272a;
+  --pm-muted-fg: #a1a1aa;
+  --pm-border: #27272a;
+  --pm-primary: #fafafa;
+  --pm-success: #34d399;
+  --pm-success-bg: rgb(6 78 59 / 0.4);
+  --pm-success-fg: #a7f3d0;
+  --pm-warning: #fbbf24;
+  --pm-warning-bg: rgb(120 53 15 / 0.4);
+  --pm-warning-fg: #fde68a;
+  --pm-danger: #f87171;
+  --pm-danger-bg: rgb(127 29 29 / 0.4);
+  --pm-danger-fg: #fecaca;
+  --pm-danger-border: rgb(248 113 113 / 0.4);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: min(980px, calc(100vw - 48px));
+  height: min(760px, calc(100vh - 48px));
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--pm-bg);
+  color: var(--pm-fg);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 0.35);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--pm-border);
+}
+
+.title {
+  flex: none;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.headerActions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.body {
+  flex: 1;
+  overflow: auto;
+  padding: 24px 28px;
+}
+
+.note {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--pm-muted-fg);
+  font-size: 14px;
+}
+
+.note p {
+  margin: 8px 0 0;
+}
+
+/* Overview column mirrors the original dashboard's centered max-w-4xl. */
+.overview {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.overviewHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.courseName {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.language {
+  font-size: 14px;
+  color: var(--pm-muted-fg);
+}
+
+.card {
+  border: 1px solid var(--pm-border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: var(--pm-bg);
+}
+
+.progressRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.percent {
+  font-weight: 600;
+}
+
+.progressBar {
+  margin-top: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--pm-muted);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--pm-primary);
+}
+
+.hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--pm-muted-fg);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.statValue {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.statLabel {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--pm-muted-fg);
+}
+
+.toneOk {
+  color: var(--pm-success);
+}
+
+.toneWarn {
+  color: var(--pm-warning);
+}
+
+.toneMuted {
+  color: var(--pm-muted-fg);
+}
+
+/* Table: centered cells like the original shadcn table (text-sm). */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th {
+  height: 36px;
+  padding: 0 12px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--pm-muted-fg);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--pm-border);
+}
+
+.table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--pm-border);
+}
+
+.chapterRow {
+  cursor: pointer;
+}
+
+.chapterRow:hover {
+  background: color-mix(in srgb, var(--pm-muted) 50%, transparent);
+}
+
+.chapterTitle {
+  font-weight: 500;
+}
+
+.chapterTitle:hover {
+  text-decoration: underline;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.dim {
+  color: var(--pm-muted-fg);
+}
+
+/* Badges follow the original badge variants (rounded-none, text-xs). */
+.badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.badgeOk {
+  background: var(--pm-success-bg);
+  color: var(--pm-success-fg);
+}
+
+.badgeWarn {
+  background: var(--pm-warning-bg);
+  color: var(--pm-warning-fg);
+}
+
+.badgeDanger {
+  background: var(--pm-danger-bg);
+  color: var(--pm-danger-fg);
+}
+
+.badgeMuted {
+  background: var(--pm-muted);
+  color: var(--pm-muted-fg);
+}
+
+.missing {
+  border-color: var(--pm-danger-border);
+}
+
+.missing h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.missing ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: var(--pm-muted-fg);
+}
+
+/* Chapter view: sidebar (back + meta + tabs) beside the active document. */
+.chapter {
+  display: flex;
+  gap: 32px;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.chapterAside {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 184px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--pm-muted-fg);
+  cursor: pointer;
+  text-align: left;
+}
+
+.backLink:hover {
+  color: var(--pm-fg);
+}
+
+.chapterMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chapterName {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.chapterId {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: var(--pm-muted-fg);
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 12px;
+  border: none;
+  border-left: 2px solid transparent;
+  background: transparent;
+  text-align: left;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--pm-muted-fg);
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--pm-fg);
+}
+
+.tabActive {
+  border-left-color: var(--pm-primary);
+  background: var(--pm-muted);
+  color: var(--pm-fg);
+  font-weight: 500;
+}
+
+.tabIcon {
+  display: inline-flex;
+  color: var(--pm-muted-fg);
+}
+
+.tabActive .tabIcon {
+  color: var(--pm-primary);
+}
+
+.chapterMain {
+  flex: 1;
+  min-width: 0;
+}
