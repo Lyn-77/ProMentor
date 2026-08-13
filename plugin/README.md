@@ -12,7 +12,9 @@
 
 ## 界面
 
-- 会话输入框上方会出现一个 **ProMentor** 按钮（composer dock）。
+- 会话输入框上方会出现一个 **ProMentor** 按钮（composer dock），
+  **仅当当前会话工作区存在 `.promentor/` 课程时显示**（每 10 秒自动探测：
+  `init` 生成课程后按钮自动出现，删除 `.promentor/` 后自动消失）。
 - 点击打开全屏 Dashboard 面板，展示**当前会话工作目录**的 `.promentor/`
   课程：总体进度、章节表格、讲义与源码导读（Markdown 渲染）。
 - 面板右上角可刷新 / 关闭。
