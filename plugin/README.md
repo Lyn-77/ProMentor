@@ -8,7 +8,7 @@
   - `packages/client/ui-promentor`（`@deepseek-ai/dsh-client-ui-promentor`）
 - 本目录只负责**注册**：`cordis.patch.yml` 是注册行的唯一事实来源，
   `install.sh` 把它幂等地写入 `~/.dsh/profiles/web/cordis.patch.yml`
-  （该文件被 `dsh web` 热监听，改完**刷新浏览器即可生效，无需重启 GUI**）。
+  （**注意**：写入后需重启 GUI——Ctrl+C 停掉 `dsh web` 后重新启动——再刷新浏览器才能生效）。
 
 ## 界面
 
@@ -29,8 +29,8 @@ DSH_HARNESS=/path/to/deepseek-harness bash plugin/install.sh
 bash plugin/install.sh        # 默认找 ~/CODE/project/deepseek-harness
 ```
 
-脚本幂等：可重复执行。完成后刷新 `http://127.0.0.1:3080` 页面即可看到
-dock 按钮。
+脚本幂等：可重复执行。完成后**重启 GUI**（Ctrl+C 后重新运行启动命令）并刷新
+`http://127.0.0.1:3080` 页面，即可看到 dock 按钮。
 
 ## 卸载
 
@@ -49,7 +49,8 @@ bash plugin/uninstall.sh      # 从 profiles/node_modules 移除软链、从 pat
 ## 原理
 
 1. `dsh web` 的 profile 配置树根在 `~/.dsh/profiles/web/`，
-   `cordis.patch.yml` 被进程内 HMR 监听：**文件变更即热重载配置**。
+   `cordis.patch.yml` 在启动时被读取；**修改后需要重启 GUI 才生效**（当前
+   版本的进程内热监听不可靠，安装/卸载脚本均按"重启"设计）。
 2. 插入的两行让 loader 挂载两个新插件；`dsh-client-modules` 的增量扫描
    把 `dsh.client` 包合入 `window.__DSH_BOOT__` 入口图，刷新页面后生效。
 3. 模块解析锚点是 `~/.dsh/profiles/node_modules`（启动时从安装锚点 BFS

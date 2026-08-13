@@ -8,12 +8,63 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 
 ## 安装
 
-### 方式一：从 Release 解压（推荐）
+### ① DSH Web GUI 内置 Dashboard（DSH 专用，先看这里）
+
+> **为什么 DSH 要多装一步**：Codex / Claude Code 等其他 Agent 的 Dashboard 是技能包自带的
+> 静态网页（技能包解压即用）；而 **DSH（DeepSeek Harness）的 Dashboard 是集成进 Web GUI
+> 的插件**，需要单独安装注册一次。装好后点按钮即开，无需任何本地服务，体验反而更好。
+
+**前置条件**
+
+- 已 clone 并运行过 DSH Web GUI（deepseek-harness 仓库，启动命令如 `pnpm dsh web`）
+- 已 clone 本仓库（ProMentor）
+- Node.js + pnpm（仅构建插件包时需要）
+
+**安装步骤**
+
+```bash
+# 1. 把 deepseek-harness 切换到插件分支
+cd /path/to/deepseek-harness
+git checkout feat/promentor-dashboard-plugin
+
+# 2. 运行安装脚本（在 ProMentor 仓库根目录执行）
+cd /path/to/ProMentor
+bash plugin/install.sh
+# harness 不在默认位置 ~/CODE/project/deepseek-harness 时：
+# DSH_HARNESS=/path/to/deepseek-harness bash plugin/install.sh
+
+# 3. 重启 GUI：Ctrl+C 停掉 dsh web 进程，重新运行启动命令，再刷新浏览器页面
+```
+
+脚本是幂等的（可重复执行），只做三件事：
+
+1. **构建**两个插件包（`packages/host/promentor` 数据网关 + `packages/client/ui-promentor` 面板 UI，位于 deepseek-harness 仓库）
+2. **软链**进 `~/.dsh/profiles/node_modules/@deepseek-ai/`
+3. **注册行**写入 `~/.dsh/profiles/web/cordis.patch.yml`（下次启动自动加载）
+
+**验证**：刷新后，会话输入框上方出现 **ProMentor** 按钮，点击打开 Dashboard——
+面板跟随当前会话的工作目录，直接读取 `.promentor/` 课程数据，无需任何本地服务。
+
+**卸载**：
+
+```bash
+bash plugin/uninstall.sh      # 移除软链与注册行，重启 GUI 后插件不再加载
+```
+
+**常见问题**
+
+| 现象 | 处理 |
+|------|------|
+| 没有出现 ProMentor 按钮 | 确认第 1、2 步完成、GUI 已重启、浏览器强刷（Cmd/Ctrl+Shift+R） |
+| 面板提示"还没有课程" | 当前会话工作目录下没有 `.promentor/`，先运行 `/promentor init` |
+| 面板打不开 | 确认 harness 分支是 `feat/promentor-dashboard-plugin`，重跑 `install.sh` 后重启 |
+
+### ② 其他 Agent：从 Release 解压（推荐）
 
 1. 前往 [Releases](https://github.com/Lyn-77/ProMentor/releases) 下载最新 `promentor-skill-<版本>.zip`
 2. 解压后把 `promentor/` 放到 `.{YourAgent}/skills/promentor`
 
-### 方式二：从源码构建
+### ③ 其他 Agent：从源码构建
 
 需要 Node.js 与 pnpm：
 
@@ -28,7 +79,7 @@ pnpm build:dashboard
 
 运行时仅需 Python 3 标准库
 
-### 同步到本机已安装副本（Codex）
+### ④ 同步到本机已安装副本（Codex）
 
 仓库 `skills/promentor/` 是唯一事实来源。修改后同步到 Codex 技能目录：
 
@@ -38,7 +89,7 @@ rsync -a --delete skills/promentor/ ~/.agents/skills/promentor/
 
 ## 使用
 
-在 Codex、Claude Code 等支持 `/promentor` 命令的 AI 编程助手中打开你的项目，然后：
+在 DSH（DeepSeek Harness）、Codex、Claude Code 等支持 `/promentor` 命令的 AI 编程助手中打开你的项目，然后：
 
 ### 1. 生成课程
 
@@ -103,9 +154,9 @@ AI 对比你的实现 vs 原始源码，解释设计决策、"为什么这样做
 
 **DSH Web GUI 内置面板（推荐）**：点击会话输入框上方的 `ProMentor` 按钮，
 面板跟随当前会话的工作目录，直接读取 `.promentor/` 课程数据——无需任何本地服务。
-安装方式见 `plugin/README.md`（一条命令 `bash plugin/install.sh`）。
+安装教程见上方 **① DSH Web GUI 内置 Dashboard**（一条命令 `bash plugin/install.sh`）。
 
-**独立仪表盘（备用）**：自动读取 `.promentor/` 下生成的课程数据，浏览器网页与 Agent 对话双通道查看。
+**独立仪表盘（备用，供 Codex / Claude Code 等）**：自动读取 `.promentor/` 下生成的课程数据，浏览器网页与 Agent 对话双通道查看。
 
 **功能**
 
