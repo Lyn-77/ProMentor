@@ -2,7 +2,7 @@
 #
 # install.sh 会剥离本文件的注释行，只取下面的注册行块，写入
 # ~/.dsh/profiles/web/cordis.patch.yml（替换其中的 `[]` 或追加到列表末尾）。
-# 注意：patch 文件改动需要重启 GUI 才生效（当前版本的进程内热监听不可靠）。
+# 注意：patch 文件改动需要重启 GUI 才生效。
 # 行 id 必须全局唯一（与 web-app bundle 层、其他用户行不冲突）。
 
 - insert:

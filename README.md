@@ -13,7 +13,7 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 > **为什么 DSH 要多装一步**：Codex / Claude Code 等其他 Agent 的 Dashboard 是技能包自带的
 > 静态网页（技能包解压即用）；而 **DSH（DeepSeek Harness）的 Dashboard 是集成进 Web GUI
 > 的插件**，需要安装注册一次。装好后点按钮即开，无需任何本地服务，体验反而更好。
-> 插件以**预构建产物**随 Release 压缩包分发（仓库本身不含构建产物，见文末"发版"）。
+> 插件以**预构建产物**随 Release 压缩包分发（仓库本身不含构建产物，见下方"发版"）。
 
 **前置条件**
 
@@ -49,7 +49,7 @@ bash dsh-plugin/install.sh
    会重建该目录的内置软链，但**不会删除外部加入的包**，因此跨重启持久生效。
    （若你是从 DSH 源码运行且该包已由内置闭包管理为软链，脚本会识别并保持不动。）
 2. **写入注册行**：把两行插件注册幂等写入 `~/.dsh/profiles/web/cordis.patch.yml`
-   （自动处理模板 `[]` 合并，可自愈历史损坏文件）。
+   （自动处理模板 `[]` 合并）。
 
 然后**重启 GUI**：Ctrl+C 停掉 `dsh web`，重新运行启动命令，刷新浏览器页面。
 
@@ -87,8 +87,8 @@ make release      # 打 zip 到 release/promentor.zip（缺失的产物自动构
   上传到 GitHub Releases（可重命名为 `promentor-skill-<版本>.zip`）。
 - `release/` 目录不入库（.gitignore），是发版输出专用文件夹。
 - DSH 插件源码：deepseek-harness 仓库（`packages/host/promentor` +
-  `packages/client/ui-promentor`，分支 `feat/promentor-dashboard-plugin`），
-  并镜像在本仓库 `dsh-plugin/src/`（源码入库，构建产物不入库）。
+  `packages/client/ui-promentor`），并镜像在本仓库 `dsh-plugin/src/`
+  （源码入库，构建产物不入库）。
 - `make release` 底层调用 `pack-release.sh`：自动调用
   `dsh-plugin/rebuild-dist.sh`（需要 `DSH_HARNESS` 指向 deepseek-harness）
   与 dashboard 构建（需要 Node/pnpm）；产物已存在则跳过。

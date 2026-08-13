@@ -25,7 +25,7 @@ echo "▶ 重建 ProMentor Dashboard 预构建产物"
 echo "  harness: $HARNESS"
 echo "  dist:    $DIST"
 
-[ -d "$HARNESS/$HOST_PKG" ] || { echo "错误：找不到 $HARNESS/$HOST_PKG —— 请先切换到包含插件的 deepseek-harness 分支（feat/promentor-dashboard-plugin）"; exit 1; }
+[ -d "$HARNESS/$HOST_PKG" ] || { echo "错误：找不到 $HARNESS/$HOST_PKG —— 请确认 deepseek-harness 已包含插件源码（feat/promentor-dashboard-plugin 分支或已合并到 main）"; exit 1; }
 [ -d "$HARNESS/$CLIENT_PKG" ] || { echo "错误：找不到 $HARNESS/$CLIENT_PKG"; exit 1; }
 
 # 1) 构建（缺失时才构建，避免每次重复编译）

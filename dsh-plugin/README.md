@@ -13,8 +13,8 @@
 | `src/client-ui-promentor/` | **插件源码**：面板 UI（对应 deepseek-harness `packages/client/ui-promentor`，入库） |
 | `dist/` | **预构建插件包**（安装用；**不入库**——发版时由 `make release` 构建进 Release zip） |
 
-插件源码的权威位置是 deepseek-harness 仓库的分支
-`feat/promentor-dashboard-plugin`；`src/` 是与仓库同步的镜像（供查阅，
+插件源码位于 deepseek-harness 仓库（`packages/host/promentor` +
+`packages/client/ui-promentor`）；`src/` 是本仓库的同步镜像（供查阅，
 构建仍需 harness 工作区，见 `rebuild-dist.sh`）。`dist/` 不提交 git：
 要么从 Release 的 `promentor.zip` 获取（推荐），要么本地运行
 `bash dsh-plugin/rebuild-dist.sh` 生成。
@@ -36,7 +36,7 @@ bash dsh-plugin/install.sh
 
 脚本幂等、可重复执行；支持 `DSH_HOME=/path/to/.dsh bash dsh-plugin/install.sh`
 自定义 DSH 配置目录。完成后**重启 GUI**（Ctrl+C 后重新运行启动命令）并刷新
-`http://127.0.0.1:3080` 页面，即可看到 dock 按钮。
+浏览器页面，即可看到 dock 按钮。
 
 安装逻辑：
 
@@ -46,7 +46,7 @@ bash dsh-plugin/install.sh
    安装的内置闭包管理为软链，则保持不动（自动跟随源码构建）。
 2. 把注册行（来自 `cordis.patch.yml`，剥离注释后）合并进
    `~/.dsh/profiles/web/cordis.patch.yml`：替换模板的 `[]` 或追加到列表
-   末尾；先剥旧块再重写，幂等且可自愈历史损坏文件。
+   末尾；幂等且可重复执行。
 
 ## 卸载
 
@@ -68,8 +68,7 @@ bash dsh-plugin/uninstall.sh      # 移除插件包与注册行（恢复模板 [
 ## 原理
 
 1. `dsh web` 的 profile 配置树根在 `~/.dsh/profiles/web/`，
-   `cordis.patch.yml` 在启动时被读取；**修改后需要重启 GUI 才生效**（当前
-   版本的进程内热监听不可靠，安装/卸载脚本均按"重启"设计）。
+   `cordis.patch.yml` 在启动时被读取；**修改后需要重启 GUI 才生效**。
 2. 插入的两行让 loader 挂载两个新插件；`dsh-client-modules` 的增量扫描
    把 `dsh.client` 包合入 `window.__DSH_BOOT__` 入口图，刷新页面后生效。
 3. 模块解析锚点是 `~/.dsh/profiles/node_modules`（启动时从安装锚点 BFS

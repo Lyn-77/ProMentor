@@ -56,7 +56,7 @@ for name in "$HOST_NAME" "$CLIENT_NAME"; do
   fi
 done
 
-# 2) 幂等写入注册行（先剥掉旧块再重写，可自愈历史损坏的 patch 文件）。
+# 2) 幂等写入注册行（先清理旧注册再重写）。
 #    模板文件以一行 `[]` 结尾（完整 YAML 文档），直接追加会变成第二个文档
 #    导致解析失败；因此：有 `[]` 就替换它，没有就追加到列表末尾。
 ROWS_SOURCE="$DIST_DIR/../cordis.patch.yml"

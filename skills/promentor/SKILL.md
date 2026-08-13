@@ -401,10 +401,9 @@ bash promentor/dsh-plugin/install.sh    # 解压 Release 的 promentor.zip 后�
 ```
 
 安装后重启 GUI 并刷新页面即可。插件源码位于 deepseek-harness 仓库
-（`packages/host/promentor` + `packages/client/ui-promentor`，分支
-`feat/promentor-dashboard-plugin`），并镜像在本仓库 `dsh-plugin/src/`；
-预构建产物 `dsh-plugin/dist/` 不入库，随 Release zip 分发（见仓库根
-`Makefile`，`make release`）。
+（`packages/host/promentor` + `packages/client/ui-promentor`），并镜像在
+本仓库 `dsh-plugin/src/`；预构建产物 `dsh-plugin/dist/` 不入库，随
+Release zip 分发（见仓库根 `Makefile`，`make release`）。
 
 **第三步：备用方案（无 GUI 环境）**
 
