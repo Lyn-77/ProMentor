@@ -8,112 +8,53 @@ ProMentor 是一个 **AI Coding Agent Skill**。装上它，你的 AI 编程助�
 
 ## 安装
 
-### ① DSH Web GUI 内置 Dashboard（DSH 专用，先看这里）
+### ① DSH Web GUI 内置 Dashboard（DSH 专用）
 
-> **为什么 DSH 要多装一步**：Codex / Claude Code 等其他 Agent 的 Dashboard 是技能包自带的
-> 静态网页（技能包解压即用）；而 **DSH（DeepSeek Harness）的 Dashboard 是集成进 Web GUI
-> 的插件**，需要安装注册一次。装好后点按钮即开，无需任何本地服务，体验反而更好。
-> 插件以**预构建产物**随 Release 压缩包分发（仓库本身不含构建产物，见下方"发版"）。
-
-**前置条件**
-
-- DSH Web GUI 已安装并能运行（无论 `npm i -g @deepseek-ai/dsh` 还是源码方式），
-  且**成功启动过至少一次**（用于生成配置文件）
-- 已获得 `dsh-plugin/` 目录（见下）
-
-**获取 dsh-plugin（二选一）**
-
-- **方式 A（推荐，免构建）**：从 [Releases](https://github.com/Lyn-77/ProMentor/releases)
-  下载 `promentor.zip`（内含预构建的 dashboard 与 `dsh-plugin/dist/`），解压后
-  得到 `promentor/` 目录。
-- **方式 B（源码）**：`git clone` 本仓库（仓库不含构建产物），按下方"发版"
-  章节构建 `dsh-plugin/dist/`，或直接构建后使用 `dsh-plugin/`。
+> 只有 DSH 需要本小节：它的 Dashboard 是 **GUI 内置插件**（Codex / Claude Code
+> 等其他 Agent 的技能包自带静态网页，跳过本小节）。插件预构建产物随 Release 包
+> 分发，仓库本身不含构建产物。
 
 **安装（一条命令）**
 
 ```bash
-# 方式 A：在解压出的 promentor/ 目录内
+# 方式 A（推荐）：下载 Release 的 promentor.zip 并解压
 cd <解压目录>/promentor
 bash dsh-plugin/install.sh
 
-# 方式 B：在仓库根目录
+# 方式 B（源码）：clone 本仓库后先 make build
 cd /path/to/ProMentor
 bash dsh-plugin/install.sh
 ```
 
-脚本是幂等的（可重复执行），只做两件事：
+然后**重启 GUI**（Ctrl+C 后重新运行启动命令）并刷新浏览器。已初始化 `.promentor/`
+课程的会话，输入框上方会出现 **ProMentor** 按钮，点击即打开面板（跟随当前会话
+工作目录，无需任何本地服务）。
 
-1. **安装插件包**：把 `dsh-plugin/dist/` 里的两个预构建包
-   （`@deepseek-ai/dsh-host-promentor` 数据网关 + `@deepseek-ai/dsh-client-ui-promentor`
-   面板 UI）拷贝进 `~/.dsh/profiles/node_modules/@deepseek-ai/`。DSH 启动时
-   会重建该目录的内置软链，但**不会删除外部加入的包**，因此跨重启持久生效。
-   （若你是从 DSH 源码运行且该包已由内置闭包管理为软链，脚本会识别并保持不动。）
-2. **写入注册行**：把两行插件注册幂等写入 `~/.dsh/profiles/web/cordis.patch.yml`
-   （自动处理模板 `[]` 合并）。
+- 脚本幂等、可重复执行，自动完成插件安装与注册
+- 卸载：`bash dsh-plugin/uninstall.sh`；更新：重新获取/构建后重跑 install.sh
+- 常见问题：报错 `Cannot find package` → 重跑 install.sh；没有按钮 → 重启 GUI + 强刷 + 确认已 `/promentor init`；报错"没有找到配置文件" → 先成功启动过一次 `dsh web`
 
-然后**重启 GUI**：Ctrl+C 停掉 `dsh web`，重新运行启动命令，刷新浏览器页面。
-
-**验证**：刷新后，在【已初始化 `.promentor/` 课程的会话】输入框上方会出现
-**ProMentor** 按钮（无课程的工作区不显示按钮），点击打开 Dashboard——面板跟随
-当前会话的工作目录，直接读取 `.promentor/` 课程数据，无需任何本地服务。
-
-**更新插件**：重新下载 Release 包（或重新构建后），再次运行
-`bash dsh-plugin/install.sh` 覆盖安装，重启 GUI 即可。
-
-**卸载**：
+**发版（维护者）**
 
 ```bash
-bash dsh-plugin/uninstall.sh      # 移除插件包与注册行，重启 GUI 后插件不再加载
+make build && make release    # 产出 release/promentor.zip，上传到 GitHub Releases 即可
 ```
-
-**常见问题**
-
-| 现象 | 处理 |
-|------|------|
-| 报错"没有找到 DSH 配置文件目录" | 先成功启动过一次 `dsh web` 再运行安装脚本 |
-| 报错"找不到预构建产物" | 你用的是源码方式但还没构建：见文末"发版"，或改下 Release zip |
-| 启动报错 `Cannot find package '@deepseek-ai/dsh-*-promentor'` | 注册行还在但插件包解析不到（如源码目录被移走/软链悬空）：重跑 `bash dsh-plugin/install.sh` 覆盖安装（会自动清除悬空软链），或先卸载再安装 |
-| 没有出现 ProMentor 按钮 | 确认已重启 GUI、浏览器强刷（Cmd/Ctrl+Shift+R）、当前会话工作区已 `/promentor init` |
-| 面板打不开 | 重新运行 `install.sh` 后重启 GUI；仍不行可查看 GUI 启动日志 |
-
-**发版（维护者，仓库不含任何构建产物）**
-
-```bash
-make build        # 或直接 make：构建一切（dashboard + DSH 插件 dist）
-make release      # 打 zip 到 release/promentor.zip（缺失的产物自动构建）
-```
-
-- 发版流程：`make build && make release`，然后把 `release/promentor.zip`
-  上传到 GitHub Releases（可重命名为 `promentor-skill-<版本>.zip`）。
-- `release/` 目录不入库（.gitignore），是发版输出专用文件夹。
-- DSH 插件源码：deepseek-harness 仓库（`packages/host/promentor` +
-  `packages/client/ui-promentor`），并镜像在本仓库 `dsh-plugin/src/`
-  （源码入库，构建产物不入库）。
-- `make release` 底层调用 `pack-release.sh`：自动调用
-  `dsh-plugin/rebuild-dist.sh`（需要 `DSH_HARNESS` 指向 deepseek-harness）
-  与 dashboard 构建（需要 Node/pnpm）；产物已存在则跳过。
-- `make clean` 删除全部构建产物与 `release/` 输出。
 
 ### ② 其他 Agent：从 Release 解压（推荐）
 
-1. 前往 [Releases](https://github.com/Lyn-77/ProMentor/releases) 下载最新 `promentor.zip`（或 `promentor-skill-<版本>.zip`）
+1. 前往 [Releases](https://github.com/Lyn-77/ProMentor/releases) 下载最新 `promentor.zip`
 2. 解压后把 `promentor/` 放到 `.{YourAgent}/skills/promentor`
    （DSH 用户：`promentor/dsh-plugin/` 即插件的完整目录，见上方 ①）
 
 ### ③ 其他 Agent：从源码构建
 
-需要 Node.js 与 pnpm：
-
 ```bash
 cd dashboard
-pnpm install
-pnpm build:dashboard
+pnpm install && pnpm build:dashboard
 ```
 
-然后，将整个 `skills/promentor/` 目录复制到 `.{YourAgent}/skills/promentor`
-（构建产物会自动输出到 `skills/promentor/dashboard/`）
-
-运行时仅需 Python 3 标准库
+然后将 `skills/promentor/` 整个目录复制到 `.{YourAgent}/skills/promentor`
+（构建产物自动输出到 `skills/promentor/dashboard/`）。运行时仅需 Python 3 标准库。
 
 ### ④ 同步到本机已安装副本（Codex）
 
